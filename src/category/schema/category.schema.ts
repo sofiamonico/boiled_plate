@@ -18,11 +18,12 @@ export class Category {
     },
   })
   _id: string;
-  @Prop({ required: true, minLength: 3, maxLength: 50 })
+  @Prop({ required: true, minLength: 3, maxLength: 50, unique: true })
   name: string;
   @Prop({
     minLength: 3,
     maxLength: 53,
+    unique: true,
     default: function () {
       return this.name.toLowerCase().split(' ').join('_');
     },
@@ -30,6 +31,10 @@ export class Category {
   slug: string;
   @Prop({ required: true, minLength: 20, maxLength: 70 })
   description: string;
+  @Prop()
+  created_at: Date;
+  @Prop()
+  updated_at: Date;
   @Prop()
   delete_at: Date;
 }
