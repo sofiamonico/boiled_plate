@@ -38,7 +38,7 @@ describe('CategorySchema', () => {
   });
 
   describe('Category', () => {
-    it('should be created a Category', async () => {
+    it('should create a Category', async () => {
       const now = new Date();
       const validCategory = {
         name: 'Frutas',
@@ -173,7 +173,7 @@ describe('CategorySchema', () => {
           'is longer than the maximum allowed length (70).',
         );
       });
-      it('should reject, because description is a string', async () => {
+      it('should reject, because description is not a string', async () => {
         const invalidCategory = {
           name: 'Frutas tropicales',
           description: [1, 2, 3, 4, 5, 6],
