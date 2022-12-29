@@ -18,10 +18,12 @@ describe('CategoryService', () => {
         MongooseModule.forRoot(
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
+        //Cargo el modulo de Category, no hace falta que cargue el archivo de config porque solo estoy testeando el service
         MongooseModule.forFeature([
           { name: Category.name, schema: CategorySchema },
         ]),
       ],
+      //Me sigo trayendo el DBServices ya que es el que se encarga de limpiar la base de datos
       providers: [DBTestService, CategoryService],
     }).compile();
 
@@ -31,10 +33,13 @@ describe('CategoryService', () => {
   beforeEach(async () => {
     await dbTestService.clearDB();
   });
+  //Testeo si los services fueron definidos correctamente
   it('should be defined', () => {
     expect(categoryService).toBeDefined();
     expect(dbTestService).toBeDefined();
   });
+
+  //Solo testeo la creacion correctta de una category y posibles casos de fallos dentro del services
   describe('Category', () => {
     it('should be created a category', async () => {
       const validCategory = {

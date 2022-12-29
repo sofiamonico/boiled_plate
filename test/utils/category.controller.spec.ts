@@ -23,6 +23,7 @@ describe('CategoryController', () => {
         MongooseModule.forRoot(
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
+        //Cargo el modulo de Category, no hace falta que cargue el archivo de config porque solo estoy testeando el controller
         MongooseModule.forFeature([
           { name: Category.name, schema: CategorySchema },
         ]),

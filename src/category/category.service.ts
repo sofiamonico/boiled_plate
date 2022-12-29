@@ -9,7 +9,13 @@ export class CategoryService {
   constructor(
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
   ) {}
-  async create(createCategoyDto: CreateCategoryDto) {
+  /**
+   * method that create a categoy
+   * @param {CreateCategoryDto} createCategoyDto with name and description
+   * @throws {HttpException} existing category
+   * @returns {Category} created category
+   */
+  async create(createCategoyDto: CreateCategoryDto): Promise<Category> {
     const exist = await this.categoryModel.find({
       slug: createCategoyDto.name.toLowerCase().split(' ').join('_'),
     });
