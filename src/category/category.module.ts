@@ -1,13 +1,20 @@
-import { Category, CategorySchema } from './schema/category.schema';
+import { Category } from './schema/category.schema';
 import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
+import { configCategorySchema } from './schema/schema-config';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Category.name, schema: CategorySchema },
+    MongooseModule.forFeatureAsync([
+      {
+        name: Category.name,
+        imports: [Connection],
+        inject: [getConnectionToken()],
+        useFactory: configCategorySchema,
+      },
     ]),
   ],
   controllers: [CategoryController],
