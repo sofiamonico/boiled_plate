@@ -58,11 +58,6 @@ describe('CategoryController', () => {
           description: validCategory.description,
         })
         .expect(201);
-      console.log('🚀 ~ file: category.controller.spec.ts:65 ~ it ~ now', now);
-      console.log(
-        '🚀 ~ file: category.controller.spec.ts:65 ~ it ~ response.body.created_at',
-        response.body.created_at,
-      );
       expect(response.body.name).toEqual(validCategory.name);
       expect(response.body.description).toEqual(validCategory.description);
       expect(response.body.slug).toEqual('frutas');
