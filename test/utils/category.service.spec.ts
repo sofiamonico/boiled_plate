@@ -1,3 +1,4 @@
+import { Pagination } from './../../src/category/pagination/pagination.dto';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
@@ -73,6 +74,27 @@ describe('CategoryService', () => {
         .catch((e) => e);
 
       expect(response.message).toContain('name: Path `name` is required.');
+    });
+  });
+
+  describe('findAll Categories', () => {
+    it('should show the null data but with a paginated response', async () => {
+      const pagination = {
+        page: 1,
+        page_size: 1,
+        skip: 0,
+      };
+      const response = await categoryService.findAll(pagination);
+      expect(response).toEqual(null);
+    });
+    it('should show paginated data', async () => {
+      dbTestService.populateDB();
+      const pagination = {
+        page: 1,
+        page_size: 1,
+        skip: 0,
+      };
+      const response = await categoryService.findAll(pagination);
     });
   });
 });
