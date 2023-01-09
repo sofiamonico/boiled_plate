@@ -59,30 +59,8 @@ export class CategoryService {
         },
       ])
       .exec();
-    console.log(
-      '🚀 ~ file: category.service.ts:64 ~ CategoryService ~ findAll ~ data[0].categories',
-      data[0].categories,
-    );
-    if (data[0].categories.length === 0) {
-      return null;
-    }
-    //capture the number of existing categories
-    const amountCategories = data[0].totalCategories[0].count;
-    //function that calculates the total number of pages
-    const amountPages = this.getTotalPages(
-      amountCategories,
-      pagination.page_size,
-    );
 
-    //reset the answer
-    const results = {
-      currentPage: pagination.page,
-      sizePage: pagination.page_size,
-      amountCategories: amountCategories,
-      amountPages: amountPages,
-      data: data[0].categories,
-    };
-    return results;
+    return this.buildPaginatedResponse(pagination, data);
   }
   /**
    * method to get a category by id
@@ -112,5 +90,27 @@ export class CategoryService {
 
   getTotalPages(amountCategories: number, page_size: number): number {
     return Math.ceil(amountCategories / page_size);
+  }
+
+  buildPaginatedResponse(pagination: Pagination, data: any[]) {
+    //capture the number of existing categories. If not exist none category,
+    // amountCategories is equal to 0
+    const amountCategories =
+      data[0].totalCategories.length === 0
+        ? 0
+        : data[0].totalCategories[0].count;
+    //function that calculates the total number of pages
+    const amountPages = this.getTotalPages(
+      amountCategories,
+      pagination.page_size,
+    );
+
+    return {
+      'X-pagination-total-count': amountCategories,
+      'X-pagination-page-count': amountPages,
+      'X-pagination-current-page': pagination.page,
+      'X-pagination-page-size': pagination.page_size,
+      data: data[0].categories,
+    };
   }
 }

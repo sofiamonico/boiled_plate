@@ -8,6 +8,7 @@ import {
   CategorySchema,
 } from '../../src/category/schema/category.schema';
 import { DBTestService } from './db-test.service';
+import { plainToInstance } from 'class-transformer';
 
 describe('CategoryService', () => {
   let dbTestService: DBTestService;
@@ -78,23 +79,31 @@ describe('CategoryService', () => {
   });
 
   describe('findAll Categories', () => {
-    it('should show the null data but with a paginated response', async () => {
-      const pagination = {
+    it.only('should show the null data but with a paginated response', async () => {
+      const pagination = plainToInstance(Pagination, {
         page: 1,
         page_size: 1,
-        skip: 0,
-      };
+      });
       const response = await categoryService.findAll(pagination);
-      expect(response).toEqual(null);
+      expect(response['X-pagination-total-count']).toEqual(0);
+      expect(response['X-pagination-page-count']).toEqual(0);
+      expect(response['X-pagination-current-page']).toEqual(1);
+      expect(response['X-pagination-page-size']).toEqual(1);
+      expect(response.data.length).toEqual(0);
     });
     it('should show paginated data', async () => {
-      dbTestService.populateDB();
-      const pagination = {
+      await dbTestService.createCategories();
+      const pagination = plainToInstance(Pagination, {
         page: 1,
         page_size: 1,
-        skip: 0,
-      };
+      });
       const response = await categoryService.findAll(pagination);
+      expect(response['X-pagination-current-page']).toEqual(1);
+      expect(response['X-pagination-page-size']).toEqual(1);
+      expect(response['X-pagination-total-count']).toEqual(4);
+      expect(response['X-pagination-page-count']).toEqual(4);
+      expect(response.data.length).toEqual(1);
+      expect(Object.keys(response.data[0]).length).toEqual(7);
     });
   });
 });

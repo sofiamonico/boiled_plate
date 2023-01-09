@@ -26,7 +26,7 @@ export class DBTestService {
     );
   }
 
-  populateDB() {
+  createCategories() {
     const categories = [
       {
         name: 'Frutas Invernales',
@@ -45,12 +45,6 @@ export class DBTestService {
         description: 'Una descripcion de una categoria',
       },
     ];
-    categories.forEach((categoria) => {
-      const resp = this.categoryModel.create(categoria);
-      console.log(
-        '🚀 ~ file: db-test.service.ts:50 ~ DBTestService ~ categories.forEach ~ resp',
-        resp,
-      );
-    });
+    return this.categoryModel.insertMany(categories);
   }
 }
