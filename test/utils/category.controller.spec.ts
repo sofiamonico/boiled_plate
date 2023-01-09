@@ -14,7 +14,6 @@ import * as request from 'supertest';
 describe('CategoryController', () => {
   let dbTestService: DBTestService;
   let categoryController: CategoryController;
-  let categoryService: CategoryService;
   let app: INestApplication;
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -64,24 +63,6 @@ describe('CategoryController', () => {
       expect(response.body.slug).toEqual('frutas');
       expect(new Date(response.body.created_at) >= now).toBe(true);
       expect(new Date(response.body.updated_at) >= now).toBe(true);
-    });
-    it(`/POST invalid category because name cannot be null`, () => {
-      return request(app.getHttpServer())
-        .post('/categories')
-        .send({
-          name: '',
-          description: 'descripcion de categoria Frutas',
-        })
-        .expect(400);
-    });
-    it(`/POST invalid category because description cannot be null`, () => {
-      return request(app.getHttpServer())
-        .post('/categories')
-        .send({
-          name: 'Verduras',
-          description: '',
-        })
-        .expect(400);
     });
   });
   describe('Validations', () => {
@@ -143,7 +124,7 @@ describe('CategoryController', () => {
           name: variables.name,
           description: variables.description,
         })
-        .catch((e) => e);
+        .expect(400);
 
       expect(response.body.message[0]).toEqual(error);
     });
