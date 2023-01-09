@@ -37,10 +37,6 @@ export class TransformationInterceptor<T>
           );
           res.header('X-pagination-page-size', data['X-pagination-page-size']);
         }
-        console.log(
-          '🚀 ~ file: category.interceptors.ts:42 ~ map ~ res.body',
-          data,
-        );
         const newResponse = {
           message: `${req.method} success`,
           data: data['data'] ? data['data'] : data,

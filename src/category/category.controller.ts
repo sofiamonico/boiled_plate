@@ -1,4 +1,4 @@
-import { Pagination } from './pagination/pagination.dto';
+import { Pagination } from '../utils/pagination/pagination.dto';
 import {
   Body,
   Controller,
@@ -24,6 +24,7 @@ import { plainToInstance } from 'class-transformer';
 @UseFilters(HttpExceptionFilter)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
+
   /**
    * Controller POST /categories to create categories
    * @param {CreateCategoryDto} createCategoyDto with name and description
@@ -53,13 +54,10 @@ export class CategoryController {
   @HttpCode(HttpStatus.OK)
   @UsePipes(ParseUUIDPipe)
   @Get('id=:id')
-  findOneById(@Param('id') id: string) {
-    try {
-      return this.categoryService.findOneById(id);
-    } catch (error) {
-      console.error(error.message);
-    }
+  findOneById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    return this.categoryService.findOneById(id);
   }
+
   /**
    * controller to get a category by slug
    * @param params

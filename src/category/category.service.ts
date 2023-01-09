@@ -1,9 +1,10 @@
-import { Pagination } from './pagination/pagination.dto';
+import { Pagination } from '../utils/pagination/pagination.dto';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category, CategoryDocument } from './schema/category.schema';
+import { PaginatedResponse } from '../types/pagination.types';
 
 @Injectable()
 export class CategoryService {
@@ -33,9 +34,9 @@ export class CategoryService {
   /**
    * method that brings all categories with pagination
    * @param {Pagination} pagination,
-   * @returns {Category[]}
+   * @returns {Promise<PaginatedResponse<Category>>}
    */
-  async findAll(pagination: Pagination) {
+  async findAll(pagination: Pagination): Promise<PaginatedResponse<Category>> {
     //The aggregate method is responsible
     //for bringing the filtered categories and also
     // calculating the total of the categories
@@ -60,57 +61,23 @@ export class CategoryService {
       ])
       .exec();
 
-    return this.buildPaginatedResponse(pagination, data);
+    return pagination.buildPaginatedResponse(data);
   }
   /**
    * method to get a category by id
    * @param {string} id
-   * @returns {Category} || null
+   * @returns {Promise<Category>}
    */
-  findOneById(id: string) {
-    try {
-      return this.categoryModel.find({ _id: id, delete_at: null });
-    } catch (err) {
-      return null;
-    }
+  findOneById(id: string): Promise<any> {
+    return this.categoryModel.find({ _id: id, delete_at: null }) as any;
   }
 
   /**
    *method to get a category by slug
    * @param {string} slug
-   * @returns {Category} || null
+   * @returns {Promise<Category>} || null
    */
-  findOneBySlug(slug: string) {
-    try {
-      return this.categoryModel.find({ slug: slug, delete_at: null });
-    } catch (err) {
-      return null;
-    }
-  }
-
-  getTotalPages(amountCategories: number, page_size: number): number {
-    return Math.ceil(amountCategories / page_size);
-  }
-
-  buildPaginatedResponse(pagination: Pagination, data: any[]) {
-    //capture the number of existing categories. If not exist none category,
-    // amountCategories is equal to 0
-    const amountCategories =
-      data[0].totalCategories.length === 0
-        ? 0
-        : data[0].totalCategories[0].count;
-    //function that calculates the total number of pages
-    const amountPages = this.getTotalPages(
-      amountCategories,
-      pagination.page_size,
-    );
-
-    return {
-      'X-pagination-total-count': amountCategories,
-      'X-pagination-page-count': amountPages,
-      'X-pagination-current-page': pagination.page,
-      'X-pagination-page-size': pagination.page_size,
-      data: data[0].categories,
-    };
+  findOneBySlug(slug: string): Promise<any> {
+    return this.categoryModel.find({ slug: slug, delete_at: null }) as any;
   }
 }

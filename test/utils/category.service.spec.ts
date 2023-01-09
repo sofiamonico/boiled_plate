@@ -1,4 +1,4 @@
-import { Pagination } from './../../src/category/pagination/pagination.dto';
+import { Pagination } from '../../src/utils/pagination/pagination.dto';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
@@ -43,7 +43,7 @@ describe('CategoryService', () => {
 
   //Solo testeo la creacion correctta de una category y posibles casos de fallos dentro del services
   describe('Category', () => {
-    it('should be created a category', async () => {
+    it('should created a category', async () => {
       const validCategory = {
         name: 'Frutas',
         description: 'descripcion de categoria Frutas',
@@ -79,7 +79,7 @@ describe('CategoryService', () => {
   });
 
   describe('findAll Categories', () => {
-    it.only('should show the null data but with a paginated response', async () => {
+    it('should show the null data but with a paginated response', async () => {
       const pagination = plainToInstance(Pagination, {
         page: 1,
         page_size: 1,
@@ -104,6 +104,27 @@ describe('CategoryService', () => {
       expect(response['X-pagination-page-count']).toEqual(4);
       expect(response.data.length).toEqual(1);
       expect(Object.keys(response.data[0]).length).toEqual(7);
+    });
+    it('should show a page and a page size of 20, because the parameters if null', async () => {
+      await dbTestService.createCategories();
+      const pagination = plainToInstance(Pagination, {});
+      const response = await categoryService.findAll(pagination);
+
+      expect(response['X-pagination-current-page']).toEqual(1);
+      expect(response['X-pagination-page-size']).toEqual(20);
+      expect(response['X-pagination-total-count']).toEqual(4);
+      expect(response['X-pagination-page-count']).toEqual(1);
+    });
+  });
+  describe('findOneById Categories', () => {
+    it('should show a category by id of type UUID4', async () => {
+      const newCategory = {
+        name: 'Buenas frutas',
+        description: 'Frutas de genialisima calidad',
+      };
+      const category = await categoryService.create(newCategory);
+      const response = await categoryService.findOneById(category._id);
+      expect(response[0]).toEqual(expect.objectContaining(newCategory));
     });
   });
 });
