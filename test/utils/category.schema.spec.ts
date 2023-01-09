@@ -1,13 +1,17 @@
 import { DBTestService } from './db-test.service';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule, getModelToken } from '@nestjs/mongoose';
+import {
+  MongooseModule,
+  getModelToken,
+  getConnectionToken,
+} from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
-import { Model } from 'mongoose';
+import { Connection, Model } from 'mongoose';
 import {
   Category,
-  CategorySchema,
   CategoryDocument,
 } from '../../src/category/schema/category.schema';
+import { configCategorySchema } from '../../src/category/schema/schema-config';
 
 describe('CategorySchema', () => {
   let dbTestService: DBTestService;
@@ -20,8 +24,13 @@ describe('CategorySchema', () => {
         MongooseModule.forRoot(
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
-        MongooseModule.forFeature([
-          { name: Category.name, schema: CategorySchema },
+        MongooseModule.forFeatureAsync([
+          {
+            name: Category.name,
+            imports: [Connection],
+            inject: [getConnectionToken()],
+            useFactory: configCategorySchema,
+          },
         ]),
       ],
       providers: [DBTestService],
@@ -38,7 +47,7 @@ describe('CategorySchema', () => {
   });
 
   describe('Category', () => {
-    it('should be created a Category', async () => {
+    it('should create a Category', async () => {
       const now = new Date();
       const validCategory = {
         name: 'Frutas',
@@ -66,7 +75,6 @@ describe('CategorySchema', () => {
       const response = await categoryModel
         .create(validCategory)
         .catch((e) => e);
-
       expect(response.message).toContain('duplicate key error');
     });
     it('should reject a null name attribute', async () => {
@@ -88,7 +96,7 @@ describe('CategorySchema', () => {
         .create(invalidCategory)
         .catch((e) => e);
       expect(response.message).toContain(
-        'is shorter than the minimum allowed length (3)',
+        ' property name has failed the following constraints: minLength',
       );
     });
     it('should reject, because name is GT 50 characters', async () => {
@@ -100,7 +108,7 @@ describe('CategorySchema', () => {
         .create(invalidCategory)
         .catch((e) => e);
       expect(response.message).toContain(
-        'is longer than the maximum allowed length (50)',
+        'property name has failed the following constraints: maxLength',
       );
     });
   });
@@ -124,7 +132,9 @@ describe('CategorySchema', () => {
       const response = await categoryModel
         .create(invalidCategory)
         .catch((e) => e);
-      expect(response.message).toContain('slug: Path `slug`');
+      expect(response.message).toContain(
+        'property slug has failed the following constraints: minLength',
+      );
     });
     it('should reject, because slug is GT 50 characters', async () => {
       const invalidCategory = {
@@ -135,7 +145,7 @@ describe('CategorySchema', () => {
         .create(invalidCategory)
         .catch((e) => e);
       expect(response.message).toContain(
-        'is longer than the maximum allowed length (53)',
+        'property slug has failed the following constraints: maxLength',
       );
     });
     describe('Description', () => {
@@ -158,7 +168,7 @@ describe('CategorySchema', () => {
           .create(incompleteCategory)
           .catch((e) => e);
         expect(response.message).toContain(
-          ' is shorter than the minimum allowed length (20)',
+          ' property description has failed the following constraints: minLength',
         );
       });
       it('should reject, because description is GT 70 characters', async () => {
@@ -170,10 +180,10 @@ describe('CategorySchema', () => {
           .create(incompleteCategory)
           .catch((e) => e);
         expect(response.message).toContain(
-          'is longer than the maximum allowed length (70).',
+          'property description has failed the following constraints: maxLength',
         );
       });
-      it('should reject, because description is a string', async () => {
+      it('should reject, because description is not a string', async () => {
         const invalidCategory = {
           name: 'Frutas tropicales',
           description: [1, 2, 3, 4, 5, 6],
