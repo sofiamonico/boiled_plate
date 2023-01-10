@@ -126,5 +126,24 @@ describe('CategoryService', () => {
       const response = await categoryService.findOneById(category._id);
       expect(response[0]).toEqual(expect.objectContaining(newCategory));
     });
+    it('should show a array empty because the id  not exists', async () => {
+      const response = await categoryService.findOneById('123456');
+      expect(response).toEqual([]);
+    });
+  });
+  describe('findOnebySlug', () => {
+    it('should a category by slug', async () => {
+      const newCategory = {
+        name: 'Buenas frutas',
+        description: 'Frutas de genialisima calidad',
+      };
+      await categoryService.create(newCategory);
+      const response = await categoryService.findOneBySlug('buenas_frutas');
+      expect(response[0]).toEqual(expect.objectContaining(newCategory));
+    });
+    it('should show a array empty because the slug not exists', async () => {
+      const response = await categoryService.findOneBySlug('frutas');
+      expect(response).toEqual([]);
+    });
   });
 });

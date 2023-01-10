@@ -18,6 +18,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { HttpExceptionFilter } from './exception-filters/http-excepcion.filtro';
 import { Category } from './schema/category.schema';
 import { plainToInstance } from 'class-transformer';
+import { PaginatedResponse } from 'src/types/pagination.types';
 
 @ApiTags('categories')
 @Controller('categories')
@@ -37,10 +38,12 @@ export class CategoryController {
 
   /**
    * controller to get all paginated categories
-   * @returns {Category[]}
+   * @returns {Promise<PaginatedResponse<Category>>}
    */
   @Get()
-  findAll(@Query() plainPagination: Pagination) {
+  findAll(
+    @Query() plainPagination: Pagination,
+  ): Promise<PaginatedResponse<Category>> {
     const pagination = plainToInstance(Pagination, plainPagination);
     return this.categoryService.findAll(pagination);
   }
@@ -48,28 +51,24 @@ export class CategoryController {
   /**
    * controller to get a category by id
    * @param {string} id
-   * @throws {HttpException} non-existent category
    * @returns {Category}
    */
   @HttpCode(HttpStatus.OK)
   @UsePipes(ParseUUIDPipe)
   @Get('id=:id')
-  findOneById(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+  findOneById(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<any> {
     return this.categoryService.findOneById(id);
   }
 
   /**
    * controller to get a category by slug
    * @param params
-   * @throws {HttpException} non-existent category
    * @returns {Category}
    */
   @Get('slug=:slug')
-  findOneBySlug(@Param() params) {
-    try {
-      return this.categoryService.findOneBySlug(params.slug);
-    } catch (error) {
-      console.error(error.message);
-    }
+  findOneBySlug(@Param() params): Promise<any> {
+    return this.categoryService.findOneBySlug(params.slug);
   }
 }

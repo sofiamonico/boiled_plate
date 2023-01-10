@@ -20,6 +20,8 @@ export class TransformationInterceptor<T>
   ): Observable<Response<T>> {
     return next.handle().pipe(
       map((data) => {
+        //capture the response and if it contains pagination,
+        // add it to the headers, then I format the response
         const res = context.switchToHttp().getResponse();
         const req = context.switchToHttp().getRequest();
         if (data['X-pagination-total-count']) {
