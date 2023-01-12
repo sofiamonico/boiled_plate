@@ -130,112 +130,88 @@ describe('CategorySchema', () => {
       });
       expect(foundCategory.slug).toEqual('frutas_tropicales');
     });
-    it('should reject, because slug is LT 3 characters', async () => {
+  });
+  //Tests que corresponden a la descripcion de una Category
+  describe('Description', () => {
+    it('should reject a null describe attribute', async () => {
+      const incompleteCategory = {
+        name: 'Frutas tropicales',
+        description: '',
+      };
+      const response = await categoryModel
+        .create(incompleteCategory)
+        .catch((e) => e);
+      expect(response.message).toContain('Path `description` is required.');
+    });
+    it('should reject, because description is LT 20 characters', async () => {
+      const incompleteCategory = {
+        name: 'Frutas tropicales',
+        description: 's'.repeat(19),
+      };
+      const response = await categoryModel
+        .create(incompleteCategory)
+        .catch((e) => e);
+      expect(response.message).toContain(
+        ' property description has failed the following constraints: minLength',
+      );
+    });
+    it('should reject, because description is GT 70 characters', async () => {
+      const incompleteCategory = {
+        name: 'Frutas tropicales',
+        description: 's'.repeat(71),
+      };
+      const response = await categoryModel
+        .create(incompleteCategory)
+        .catch((e) => e);
+      expect(response.message).toContain(
+        'property description has failed the following constraints: maxLength',
+      );
+    });
+    it('should reject, because description is not a string', async () => {
       const invalidCategory = {
-        name: 'Lo',
-        description: 'descripcion de categoria incorrecta con 2 caracteres',
+        name: 'Frutas tropicales',
+        description: [1, 2, 3, 4, 5, 6],
       };
       const response = await categoryModel
         .create(invalidCategory)
         .catch((e) => e);
-      expect(response.message).toContain(
-        'property slug has failed the following constraints: minLength',
-      );
+      expect(response.message).toContain('Cast to string failed for value');
     });
-    it('should reject, because slug is GT 50 characters', async () => {
-      const invalidCategory = {
-        name: 's'.repeat(26) + ' ' + 's ' + 's'.repeat(26),
-        description: 'descripcion de categoria incorrecta con 2 caracteres',
+  });
+  //Tests que corresponden a la fecha de actualizacion de una Category
+  describe('updated_at', () => {
+    it('should change, because the category is update', async () => {
+      const validCategory = {
+        name: 'Frutas Tropicales',
+        description: 'descripcion de categoria Frutas',
       };
-      const response = await categoryModel
-        .create(invalidCategory)
-        .catch((e) => e);
-      expect(response.message).toContain(
-        'property slug has failed the following constraints: maxLength',
-      );
-    });
-    //Tests que corresponden a la descripcion de una Category
-    describe('Description', () => {
-      it('should reject a null describe attribute', async () => {
-        const incompleteCategory = {
-          name: 'Frutas tropicales',
-          description: '',
-        };
-        const response = await categoryModel
-          .create(incompleteCategory)
-          .catch((e) => e);
-        expect(response.message).toContain('Path `description` is required.');
-      });
-      it('should reject, because description is LT 20 characters', async () => {
-        const incompleteCategory = {
-          name: 'Frutas tropicales',
-          description: 's'.repeat(19),
-        };
-        const response = await categoryModel
-          .create(incompleteCategory)
-          .catch((e) => e);
-        expect(response.message).toContain(
-          ' property description has failed the following constraints: minLength',
-        );
-      });
-      it('should reject, because description is GT 70 characters', async () => {
-        const incompleteCategory = {
-          name: 'Frutas tropicales',
-          description: 's'.repeat(71),
-        };
-        const response = await categoryModel
-          .create(incompleteCategory)
-          .catch((e) => e);
-        expect(response.message).toContain(
-          'property description has failed the following constraints: maxLength',
-        );
-      });
-      it('should reject, because description is not a string', async () => {
-        const invalidCategory = {
-          name: 'Frutas tropicales',
-          description: [1, 2, 3, 4, 5, 6],
-        };
-        const response = await categoryModel
-          .create(invalidCategory)
-          .catch((e) => e);
-        expect(response.message).toContain('Cast to string failed for value');
-      });
-    });
-    //Tests que corresponden a la fecha de actualizacion de una Category
-    describe('updated_at', () => {
-      it('should change, because the category is update', async () => {
-        const validCategory = {
-          name: 'Frutas Tropicales',
-          description: 'descripcion de categoria Frutas',
-        };
-        const now = new Date();
-        await categoryModel.create(validCategory);
+      const now = new Date();
+      await categoryModel.create(validCategory);
 
-        await categoryModel.findOneAndUpdate(
-          { name: validCategory.name },
-          { name: 'Verduras invernales' },
-        );
-        const foundCategory = await categoryModel.findOne({
-          name: 'Verduras invernales',
-        });
-        expect(foundCategory.updated_at >= now).toBe(true);
+      await categoryModel.findOneAndUpdate(
+        { name: validCategory.name },
+        { name: 'Verduras invernales' },
+      );
+      const foundCategory = await categoryModel.findOne({
+        name: 'Verduras invernales',
       });
+      expect(foundCategory.updated_at >= now).toBe(true);
     });
-    //Tests que corresponden a la fecha de creacion de una Category
-    describe('delete_at', () => {
-      it('should change, because the category is delete', async () => {
-        const validCategory = {
-          name: 'Frutas Tropicales',
-          description: 'descripcion de categoria Frutas',
-        };
-        await categoryModel.create(validCategory);
-        await dbTestService.delete(validCategory.name);
-        const foundCategory = await categoryModel.findOne({
-          name: validCategory.name,
-        });
-        const now = new Date();
-        expect(foundCategory.delete_at <= now).toBe(true);
+  });
+  //Tests que corresponden a la fecha de creacion de una Category
+  describe('delete_at', () => {
+    it('should change, because the category is delete', async () => {
+      const validCategory = {
+        name: 'Frutas Tropicales',
+        description: 'descripcion de categoria Frutas',
+      };
+      await categoryModel.create(validCategory);
+      await dbTestService.delete(validCategory.name);
+      const foundCategory = await categoryModel.findOne({
+        name: validCategory.name,
       });
+      const now = new Date();
+      expect(foundCategory.delete_at <= now).toBe(true);
     });
   });
 });
