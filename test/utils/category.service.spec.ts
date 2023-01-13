@@ -164,16 +164,15 @@ describe('CategoryService', () => {
       expect(response[0]).toEqual(expect.objectContaining(categorieUpdate));
       expect(response[0].updated_at >= now).toBe(true);
     });
-    it('should show null because the id  not exists', async () => {
+    it('should reject because the id  not exists', async () => {
       const categorieUpdate = plainToInstance(UpdateCategoryDto, {
         name: 'Frutas acidas',
         description: 'Categoria de frutas acidas super ricas',
       });
-      const response = await categoryService.update(
-        '70f485bc-3bd1-457f-8671-8a09f4da7458',
-        categorieUpdate,
-      );
-      expect(response).toEqual(null);
+      const response = await categoryService
+        .update('70f485bc-3bd1-457f-8671-8a09f4da7458', categorieUpdate)
+        .catch((e) => e);
+      expect(response.message).toContain('Category not found');
     });
     it('should update only description', async () => {
       const categories = await dbTestService.createCategories();
@@ -200,6 +199,29 @@ describe('CategoryService', () => {
 
       expect(response[0].description).toEqual(categories[0].description);
       expect(response[0].name).toEqual('Frutas acidas');
+    });
+  });
+  describe('Delete', () => {
+    it('should delete a category', async () => {
+      const categories = await dbTestService.createCategories();
+      const now = new Date();
+      await categoryService.delete(categories[0]._id);
+      const response = await dbTestService.findCategoryWithDelete(
+        categories[0]._id,
+      );
+      expect(response.delete_at >= now).toBe(true);
+    });
+    it('should return null because the category has already been removed', async () => {
+      const categories = await dbTestService.createCategories();
+      await categoryService.delete(categories[0]._id);
+      const response = await categoryService
+        .delete(categories[0]._id)
+        .catch((e) => e);
+      expect(response.message).toEqual('Category not found');
+    });
+    it('should return null because the id is not valid', async () => {
+      const response = await categoryService.delete('12345').catch((e) => e);
+      expect(response.message).toEqual('Category not found');
     });
   });
 });

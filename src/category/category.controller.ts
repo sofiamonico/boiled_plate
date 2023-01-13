@@ -2,6 +2,7 @@ import { Pagination } from '../utils/pagination/pagination.dto';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -90,5 +91,15 @@ export class CategoryController {
       updateCategoryDto,
     );
     return this.categoryService.update(id, updateCategory);
+  }
+
+  /**
+   *  method to delete a category
+   * @param params
+   * @returns {Promise<Category>}
+   */
+  @Delete(':id')
+  delete(@Param() params): Promise<any> {
+    return this.categoryService.delete(params.id);
   }
 }

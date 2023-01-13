@@ -10,6 +10,8 @@ import {
 import { DBTestService } from './db-test.service';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
+import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
+import { plainToInstance } from 'class-transformer';
 
 describe('CategoryController', () => {
   let dbTestService: DBTestService;
@@ -215,6 +217,64 @@ describe('CategoryController', () => {
         .expect(200);
 
       expect(response.body).toEqual([]);
+    });
+  });
+  describe('Update', () => {
+    it('should update a category', async () => {
+      const now = new Date();
+      const categories = await dbTestService.createCategories();
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Nueva Categoria',
+        description: 'Categoria de frutas acidas super ricas',
+      });
+      const updateCategory = await request(app.getHttpServer())
+        .put(`/categories/${categories[0]._id}`)
+        .send(categorieUpdate)
+        .expect(200);
+      expect(updateCategory.body.name).toEqual('Nueva Categoria');
+      expect(updateCategory.body.description).toEqual(
+        'Categoria de frutas acidas super ricas',
+      );
+      expect(new Date(updateCategory.body.updated_at) >= now).toBe(true);
+    });
+    it('should show an array empty because the id  not exists', async () => {
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Nueva Categoria',
+        description: 'Categoria de frutas acidas super ricas',
+      });
+      const updateCategory = await request(app.getHttpServer())
+        .put(`/categories/70f485bc-3bd1-457f-8671-8a09f4da7458`)
+        .send(categorieUpdate)
+        .expect(404);
+      expect(updateCategory).toEqual('Category not found');
+    });
+    it('should be reject because the id is not UUID4', async () => {
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Nueva Categoria',
+        description: 'Categoria de frutas acidas super ricas',
+      });
+      const updateCategory = await request(app.getHttpServer())
+        .put(`/categories/121345`)
+        .send(categorieUpdate)
+        .expect(400);
+      expect(updateCategory.body['errors'][0]).toEqual(
+        'Validation failed (uuid v 4 is expected)',
+      );
+    });
+  });
+  describe('Delete', () => {
+    it('should delete a category', async () => {
+      const now = new Date();
+      const categories = await dbTestService.createCategories();
+
+      await request(app.getHttpServer())
+        .delete(`/categories/${categories[0]._id}`)
+        .expect(200);
+
+      const deleteCategory = await dbTestService.findCategoryWithDelete(
+        categories[0]._id,
+      );
+      expect(new Date(deleteCategory.delete_at) >= now).toBe(true);
     });
   });
   afterAll(async () => {
