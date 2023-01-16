@@ -75,8 +75,15 @@ export class CategoryService {
    * @param {string} id
    * @returns {Promise<Category>}
    */
-  findOneById(id: string): Promise<any> {
-    return this.categoryModel.find({ _id: id, delete_at: null }) as any;
+  async findOneById(id: string): Promise<any> {
+    const category = (await this.categoryModel.find({
+      _id: id,
+      delete_at: null,
+    })) as any;
+    if (category.length === 0) {
+      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    }
+    return category;
   }
 
   /**
@@ -84,8 +91,15 @@ export class CategoryService {
    * @param {string} slug
    * @returns {Promise<Category>} || null
    */
-  findOneBySlug(slug: string): Promise<any> {
-    return this.categoryModel.find({ slug: slug, delete_at: null }) as any;
+  async findOneBySlug(slug: string): Promise<any> {
+    const category = (await this.categoryModel.find({
+      slug: slug,
+      delete_at: null,
+    })) as any;
+    if (category.length === 0) {
+      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    }
+    return category;
   }
 
   /**

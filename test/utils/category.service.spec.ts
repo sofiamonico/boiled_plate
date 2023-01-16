@@ -131,8 +131,10 @@ describe('CategoryService', () => {
       expect(response[0]).toEqual(expect.objectContaining(newCategory));
     });
     it('should show a array empty because the id  not exists', async () => {
-      const response = await categoryService.findOneById('123456');
-      expect(response).toEqual([]);
+      const response = await categoryService
+        .findOneById('123456')
+        .catch((e) => e);
+      expect(response.message).toEqual('Category not found');
     });
   });
   describe('findOnebySlug', () => {
@@ -146,8 +148,10 @@ describe('CategoryService', () => {
       expect(response[0]).toEqual(expect.objectContaining(newCategory));
     });
     it('should show a array empty because the slug not exists', async () => {
-      const response = await categoryService.findOneBySlug('frutas');
-      expect(response).toEqual([]);
+      const response = await categoryService
+        .findOneBySlug('frutas')
+        .catch((e) => e);
+      expect(response.message).toEqual('Category not found');
     });
   });
   describe('Update', () => {
@@ -211,7 +215,7 @@ describe('CategoryService', () => {
       );
       expect(response.delete_at >= now).toBe(true);
     });
-    it('should return null because the category has already been removed', async () => {
+    it('should a error because the category has already been removed', async () => {
       const categories = await dbTestService.createCategories();
       await categoryService.delete(categories[0]._id);
       const response = await categoryService
@@ -219,7 +223,7 @@ describe('CategoryService', () => {
         .catch((e) => e);
       expect(response.message).toEqual('Category not found');
     });
-    it('should return null because the id is not valid', async () => {
+    it('should a error because the id is not valid', async () => {
       const response = await categoryService.delete('12345').catch((e) => e);
       expect(response.message).toEqual('Category not found');
     });

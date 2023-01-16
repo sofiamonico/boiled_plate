@@ -99,7 +99,9 @@ export class CategoryController {
    * @returns {Promise<Category>}
    */
   @Delete(':id')
-  delete(@Param() params): Promise<any> {
-    return this.categoryService.delete(params.id);
+  delete(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<any> {
+    return this.categoryService.delete(id);
   }
 }
