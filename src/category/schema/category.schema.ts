@@ -16,6 +16,7 @@ export type CategoryDocument = HydratedDocument<Category>;
 export class Category {
   @Prop({
     type: String,
+    //This function generates a unique ID based on uuidv4
     default: function genUUID() {
       return uuidv4();
     },
@@ -36,6 +37,8 @@ export class Category {
   @MinLength(3)
   @MaxLength(53)
   @Prop({
+    //This function is responsible for taking the name of the category,
+    //converting it to lower case and adding an underscore for each word.
     default: function () {
       return this.name.toLowerCase().split(' ').join('_');
     },

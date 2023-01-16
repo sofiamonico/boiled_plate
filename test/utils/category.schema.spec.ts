@@ -24,6 +24,7 @@ describe('CategorySchema', () => {
         MongooseModule.forRoot(
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
+        //Configuro el modulo para que pase por las validaciones de class-validator del esquema
         MongooseModule.forFeatureAsync([
           {
             name: Category.name,
@@ -33,6 +34,7 @@ describe('CategorySchema', () => {
           },
         ]),
       ],
+      //Service que se encarga de limpiar la DB
       providers: [DBTestService],
     }).compile();
 
@@ -46,6 +48,7 @@ describe('CategorySchema', () => {
     await dbTestService.clearDB();
   });
 
+  //Test que corresponden a la creacion de una Category
   describe('Category', () => {
     it('should create a Category', async () => {
       const now = new Date();
@@ -65,6 +68,8 @@ describe('CategorySchema', () => {
       expect(foundCategory.updated_at >= now).toBe(true);
     });
   });
+  //Tests que corresponden a el nombre de una Category
+  //Todo se testea en base a las validaciones de class-validator
   describe('Name', () => {
     it('should reject a repeating name attribute', async () => {
       const validCategory = {
@@ -112,6 +117,7 @@ describe('CategorySchema', () => {
       );
     });
   });
+  //Tests que corresponden al Slug de una Category
   describe('Slug', () => {
     it('should be like the name but in lower case and with a underscore', async () => {
       const validCategory = {
@@ -148,6 +154,7 @@ describe('CategorySchema', () => {
         'property slug has failed the following constraints: maxLength',
       );
     });
+    //Tests que corresponden a la descripcion de una Category
     describe('Description', () => {
       it('should reject a null describe attribute', async () => {
         const incompleteCategory = {
@@ -194,6 +201,7 @@ describe('CategorySchema', () => {
         expect(response.message).toContain('Cast to string failed for value');
       });
     });
+    //Tests que corresponden a la fecha de actualizacion de una Category
     describe('updated_at', () => {
       it('should change, because the category is update', async () => {
         const validCategory = {
@@ -213,6 +221,7 @@ describe('CategorySchema', () => {
         expect(foundCategory.updated_at >= now).toBe(true);
       });
     });
+    //Tests que corresponden a la fecha de creacion de una Category
     describe('delete_at', () => {
       it('should change, because the category is delete', async () => {
         const validCategory = {

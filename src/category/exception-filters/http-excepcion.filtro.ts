@@ -14,13 +14,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = context.getRequest<Request>();
     const status = exception.getStatus();
 
+    //format the error message
     response.status(status).json({
-      message: exception['response']['message']
-        ? exception['response']['message']
-        : exception.message,
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
+      message: `${request.method} error`,
+      data: {},
+      errors: [
+        exception['response']['message']
+          ? exception['response']['message']
+          : exception.message,
+      ],
     });
   }
 }
