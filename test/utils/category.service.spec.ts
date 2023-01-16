@@ -9,6 +9,7 @@ import {
 } from '../../src/category/schema/category.schema';
 import { DBTestService } from './db-test.service';
 import { plainToInstance } from 'class-transformer';
+import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
 
 describe('CategoryService', () => {
   let dbTestService: DBTestService;
@@ -55,10 +56,12 @@ describe('CategoryService', () => {
     });
     it('should reject a repeating category', async () => {
       const validCategory = {
-        name: 'Frutas',
-        description: 'descripcion de categoria Frutas',
+        name: 'Frutas Invernales',
+        description: 'Una descripcion de una categoria',
       };
+
       await categoryService.create(validCategory);
+
       const response = await categoryService
         .create(validCategory)
         .catch((e) => e);
@@ -97,6 +100,7 @@ describe('CategoryService', () => {
         page: 1,
         page_size: 1,
       });
+
       const response = await categoryService.findAll(pagination);
       expect(response['X-pagination-current-page']).toEqual(1);
       expect(response['X-pagination-page-size']).toEqual(1);
@@ -144,6 +148,58 @@ describe('CategoryService', () => {
     it('should show an array empty because the slug not exists', async () => {
       const response = await categoryService.findOneBySlug('frutas');
       expect(response).toEqual([]);
+    });
+  });
+  describe('Update', () => {
+    it('should update a category and modify the update date', async () => {
+      const categories = await dbTestService.createCategories();
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Frutas acidas',
+        description: 'Categoria de frutas acidas super ricas',
+      });
+      const now = new Date();
+      await categoryService.update(categories[0]._id, categorieUpdate);
+      const response = await categoryService.findOneById(categories[0]._id);
+
+      expect(response[0]).toEqual(expect.objectContaining(categorieUpdate));
+      expect(response[0].updated_at >= now).toBe(true);
+    });
+    it('should show null because the id  not exists', async () => {
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Frutas acidas',
+        description: 'Categoria de frutas acidas super ricas',
+      });
+      const response = await categoryService.update(
+        '70f485bc-3bd1-457f-8671-8a09f4da7458',
+        categorieUpdate,
+      );
+      expect(response).toEqual(null);
+    });
+    it('should update only description', async () => {
+      const categories = await dbTestService.createCategories();
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        description: 'Categoria de frutas acidas super ricas',
+      });
+
+      await categoryService.update(categories[0]._id, categorieUpdate);
+      const response = await categoryService.findOneById(categories[0]._id);
+
+      expect(response[0].name).toEqual(categories[0].name);
+      expect(response[0].description).toEqual(
+        'Categoria de frutas acidas super ricas',
+      );
+    });
+    it('should update only name', async () => {
+      const categories = await dbTestService.createCategories();
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Frutas acidas',
+      });
+
+      await categoryService.update(categories[0]._id, categorieUpdate);
+      const response = await categoryService.findOneById(categories[0]._id);
+
+      expect(response[0].description).toEqual(categories[0].description);
+      expect(response[0].name).toEqual('Frutas acidas');
     });
   });
 });

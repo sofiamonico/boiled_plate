@@ -16,6 +16,10 @@ const validateCategory = async (documentToSave: CategoryDocument) => {
     throw new Error(validationErrors.toString());
   }
 };
+
+function updateSlug(document: CategoryDocument) {
+  document.slug = document.name.toLowerCase().split(' ').join('_');
+}
 //I define a document with the new category that enters and is going to be saved,
 //and I send it as a parameter of the function validateCategory
 const preSave = function (conn: Connection) {
@@ -23,6 +27,7 @@ const preSave = function (conn: Connection) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const document: CategoryDocument = this;
     await validateCategory(document);
+    updateSlug(document);
   };
 };
 //I create a new schema and configure a pre save, that is, before it is saved,

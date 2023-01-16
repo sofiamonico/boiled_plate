@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category, CategoryDocument } from './schema/category.schema';
 import { PaginatedResponse } from '../types/pagination.types';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
@@ -21,6 +22,7 @@ export class CategoryService {
     const exist = await this.categoryModel.find({
       slug: createCategoyDto.name.toLowerCase().split(' ').join('_'),
     });
+
     if (exist.length != 0) {
       throw new HttpException(
         'This category already exists',
@@ -79,5 +81,20 @@ export class CategoryService {
    */
   findOneBySlug(slug: string): Promise<any> {
     return this.categoryModel.find({ slug: slug, delete_at: null }) as any;
+  }
+
+  /**
+   * method to update a category
+   * @param {string} id
+   * @param {UpdateCategoryDto} updateCategoryDto
+   * @returns {Promise<Category>} || null
+   */
+  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<any> {
+    const category = await this.categoryModel.findById(id);
+    if (category === null) {
+      return null;
+    }
+    Object.assign(category, updateCategoryDto);
+    return category.save() as any;
   }
 }

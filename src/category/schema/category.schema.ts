@@ -32,10 +32,6 @@ export class Category {
   name: string;
 
   @Expose()
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(3)
-  @MaxLength(53)
   @Prop({
     //This function is responsible for taking the name of the category,
     //converting it to lower case and adding an underscore for each word.

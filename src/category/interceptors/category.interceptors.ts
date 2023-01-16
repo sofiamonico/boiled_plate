@@ -24,6 +24,10 @@ export class TransformationInterceptor<T>
         // add it to the headers, then I format the response
         const res = context.switchToHttp().getResponse();
         const req = context.switchToHttp().getRequest();
+
+        if (data === null) {
+          data = [];
+        }
         if (data['X-pagination-total-count']) {
           res.header(
             'X-pagination-total-count',

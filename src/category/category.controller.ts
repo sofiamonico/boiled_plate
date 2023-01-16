@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Query,
   UseFilters,
   UsePipes,
@@ -19,6 +20,7 @@ import { HttpExceptionFilter } from './exception-filters/http-excepcion.filtro';
 import { Category } from './schema/category.schema';
 import { plainToInstance } from 'class-transformer';
 import { PaginatedResponse } from 'src/types/pagination.types';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @ApiTags('categories')
 @Controller('categories')
@@ -71,5 +73,23 @@ export class CategoryController {
   @Get('slug=:slug')
   findOneBySlug(@Param() params): Promise<any> {
     return this.categoryService.findOneBySlug(params.slug);
+  }
+
+  /**
+   * method to update a category
+   * @param params
+   * @param {UpdateCategoryDto} updateCategoryDto
+   * @returns {Promise<Category>}
+   */
+  @Put(':id')
+  update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+  ): Promise<any> {
+    const updateCategory = plainToInstance(
+      UpdateCategoryDto,
+      updateCategoryDto,
+    );
+    return this.categoryService.update(id, updateCategory);
   }
 }
