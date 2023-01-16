@@ -38,6 +38,7 @@ export class CategoryController {
 
   /**
    * controller to get all paginated categories
+   * @param {Pagination} plainPagination
    * @returns {Promise<PaginatedResponse<Category>>}
    */
   @Get()
