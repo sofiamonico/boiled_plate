@@ -44,7 +44,7 @@ describe('CategoryService', () => {
 
   //Solo testeo la creacion correctta de una category y posibles casos de fallos dentro del services
   describe('Category', () => {
-    it('should created a category', async () => {
+    it('should create a category', async () => {
       const validCategory = {
         name: 'Frutas',
         description: 'descripcion de categoria Frutas',
@@ -145,7 +145,7 @@ describe('CategoryService', () => {
       const response = await categoryService.findOneBySlug('buenas_frutas');
       expect(response[0]).toEqual(expect.objectContaining(newCategory));
     });
-    it('should show a array empty because the slug not exists', async () => {
+    it('should show an array empty because the slug not exists', async () => {
       const response = await categoryService.findOneBySlug('frutas');
       expect(response).toEqual([]);
     });
