@@ -44,7 +44,7 @@ describe('CategoryService', () => {
 
   //Solo testeo la creacion correctta de una category y posibles casos de fallos dentro del services
   describe('Category', () => {
-    it('should created a category', async () => {
+    it('should create a category', async () => {
       const validCategory = {
         name: 'Frutas',
         description: 'descripcion de categoria Frutas',

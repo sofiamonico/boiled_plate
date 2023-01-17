@@ -80,26 +80,26 @@ export class CategoryService {
       _id: id,
       delete_at: null,
     })) as any;
-    if (category.length === 0) {
-      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    if (category.length != 0) {
+      return category;
     }
-    return category;
+    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
   }
 
   /**
    *method to get a category by slug
    * @param {string} slug
-   * @returns {Promise<Category>} || null
+   * @returns {Promise<Category>}
    */
   async findOneBySlug(slug: string): Promise<any> {
     const category = (await this.categoryModel.find({
       slug: slug,
       delete_at: null,
     })) as any;
-    if (category.length === 0) {
-      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    if (category.length != 0) {
+      return category;
     }
-    return category;
+    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
   }
 
   /**
@@ -109,13 +109,17 @@ export class CategoryService {
    * @throws {HttpException} category not found
    * @returns {Promise<Category>}
    */
-  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<any> {
-    const category = await this.categoryModel.findById(id);
-    if (category === null || category.delete_at != null) {
-      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+  async update(id: string, updateCategory: UpdateCategoryDto): Promise<any> {
+    const category = await this.categoryModel.findOne({
+      _id: id,
+      delete_at: null,
+    });
+
+    if (category) {
+      Object.assign(category, updateCategory);
+      return category.save() as any;
     }
-    Object.assign(category, updateCategoryDto);
-    return category.save() as any;
+    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
   }
 
   /**
@@ -133,10 +137,10 @@ export class CategoryService {
       { $set: { delete_at: Date.now() } },
     );
 
-    if (deleted_category === null) {
-      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    if (deleted_category) {
+      return deleted_category as any;
     }
 
-    return deleted_category as any;
+    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
   }
 }

@@ -41,6 +41,7 @@ export class CategoryController {
 
   /**
    * controller to get all paginated categories
+   * @param {Pagination} plainPagination
    * @returns {Promise<PaginatedResponse<Category>>}
    */
   @Get()
@@ -84,13 +85,10 @@ export class CategoryController {
   @Put(':id')
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Body() updateCategory: UpdateCategoryDto,
   ): Promise<any> {
-    const updateCategory = plainToInstance(
-      UpdateCategoryDto,
-      updateCategoryDto,
-    );
-    return this.categoryService.update(id, updateCategory);
+    const plainCategory = plainToInstance(UpdateCategoryDto, updateCategory);
+    return this.categoryService.update(id, plainCategory);
   }
 
   /**
