@@ -7,7 +7,7 @@ import {
   Category,
   CategorySchema,
 } from '../../src/category/schema/category.schema';
-import { DBTestService } from './db-test.service';
+import { DBTestService } from '../../test/utils/db-test.service';
 import { plainToInstance } from 'class-transformer';
 import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
 

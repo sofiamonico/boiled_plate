@@ -1,16 +1,13 @@
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
-import { CategoryService } from '../../src/category/category.service';
-import { CategoryController } from '../../src/category/category.controller';
-import {
-  Category,
-  CategorySchema,
-} from '../../src/category/schema/category.schema';
-import { DBTestService } from './db-test.service';
+import { CategoryService } from './category.service';
+import { CategoryController } from './category.controller';
+import { Category, CategorySchema } from './schema/category.schema';
+import { DBTestService } from '../../test/utils/db-test.service';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import { plainToInstance } from 'class-transformer';
 
 describe('CategoryController', () => {
