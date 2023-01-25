@@ -70,9 +70,11 @@ describe('ParameterSchema', () => {
       };
       await parameterModel.create(parameter);
 
-      const foundParameter = await parameterModel.findOne({
-        name: parameter.name,
-      });
+      const foundParameter = await parameterModel
+        .findOne({
+          name: parameter.name,
+        })
+        .populate('category');
 
       expect(foundParameter.name).toEqual(parameter.name);
       expect(foundParameter.default).toEqual(parameter.default);
@@ -81,7 +83,7 @@ describe('ParameterSchema', () => {
       expect(foundParameter.slug).toEqual('parametro_prueba');
       expect(foundParameter.created_at >= now).toBe(true);
       expect(foundParameter.updated_at >= now).toBe(true);
-      //expect(foundParameter).toContain(expect.objectContaining(parameter));
+      expect(foundParameter.category._id).toEqual(category._id);
     });
   });
   describe('Error cases', () => {
@@ -167,15 +169,6 @@ describe('ParameterSchema', () => {
         },
         error:
           'Parameter validation failed: description: Cast to string failed',
-      },
-      {
-        variables: {
-          name: 'Parametro prueba',
-          default: 'Parametro prueba',
-          category: '1234567809',
-          description: 'una descripcion de un parametro',
-        },
-        error: 'Cast to [UUID] failed for value',
       },
     ])('returns error: $error', async ({ variables, error }) => {
       const category = await dbTestService.createCategory();

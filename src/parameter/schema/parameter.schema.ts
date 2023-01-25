@@ -61,7 +61,7 @@ export class Parameter {
   @Prop()
   description: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.UUID, ref: 'Category' }] })
+  @Prop({ type: mongoose.Schema.Types.String, ref: 'Category' })
   category: Category;
 
   @Expose()
