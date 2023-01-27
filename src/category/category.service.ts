@@ -143,4 +143,10 @@ export class CategoryService {
 
     throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
   }
+
+  async addParameter(id: string, id_parameter: string) {
+    await this.categoryModel.findByIdAndUpdate(id, {
+      $push: { parameters: id_parameter },
+    });
+  }
 }

@@ -1,5 +1,5 @@
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
 import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
@@ -9,6 +9,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { plainToInstance } from 'class-transformer';
+import { Connection } from 'mongoose';
+import { configCategorySchema } from './schema/schema-config';
 
 describe('CategoryController', () => {
   let dbTestService: DBTestService;
@@ -22,8 +24,13 @@ describe('CategoryController', () => {
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
         //Cargo el modulo de Category, no hace falta que cargue el archivo de config porque solo estoy testeando el controller
-        MongooseModule.forFeature([
-          { name: Category.name, schema: CategorySchema },
+        MongooseModule.forFeatureAsync([
+          {
+            name: Category.name,
+            imports: [Connection],
+            inject: [getConnectionToken()],
+            useFactory: configCategorySchema,
+          },
         ]),
       ],
       controllers: [CategoryController],

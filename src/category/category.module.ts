@@ -19,5 +19,6 @@ import { configCategorySchema } from './schema/schema-config';
   ],
   controllers: [CategoryController],
   providers: [CategoryService],
+  exports: [CategoryService],
 })
 export class CategoryModule {}

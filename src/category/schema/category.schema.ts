@@ -51,7 +51,7 @@ export class Category {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.UUID, ref: 'Parameter' }] })
+  @Prop({ type: [{ type: mongoose.Schema.Types.String, ref: 'Parameter' }] })
   parameters: Parameter[];
 
   @Expose()

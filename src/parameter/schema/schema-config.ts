@@ -1,6 +1,6 @@
 import { Parameter } from '../schema/parameter.schema';
 import { ParameterSchema, ParameterDocument } from './parameter.schema';
-import { Connection } from 'mongoose';
+import { Connection, Model } from 'mongoose';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
@@ -34,7 +34,7 @@ const preSave = function (conn: Connection) {
   };
 };
 
-export const configParameterSchema = function (conn: Connection) {
+export const configParameterSchemaParameter = function (conn: Connection) {
   const schema = ParameterSchema;
   schema.pre('save', preSave(conn));
   return schema;

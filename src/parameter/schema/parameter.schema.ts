@@ -50,7 +50,9 @@ export class Parameter {
   name: string;
 
   @Expose()
-  @Prop()
+  @Prop({
+    index: { unique: true },
+  })
   slug: string;
 
   @Expose()

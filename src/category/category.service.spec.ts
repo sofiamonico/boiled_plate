@@ -1,6 +1,6 @@
 import { Pagination } from '../../src/utils/pagination/pagination.dto';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
 import { CategoryService } from '../../src/category/category.service';
 import {
@@ -10,6 +10,8 @@ import {
 import { DBTestService } from '../../test/utils/db-test.service';
 import { plainToInstance } from 'class-transformer';
 import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
+import { Connection } from 'mongoose';
+import { configCategorySchema } from './schema/schema-config';
 
 describe('CategoryService', () => {
   let dbTestService: DBTestService;
@@ -22,8 +24,13 @@ describe('CategoryService', () => {
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
         //Cargo el modulo de Category, no hace falta que cargue el archivo de config porque solo estoy testeando el service
-        MongooseModule.forFeature([
-          { name: Category.name, schema: CategorySchema },
+        MongooseModule.forFeatureAsync([
+          {
+            name: Category.name,
+            imports: [Connection],
+            inject: [getConnectionToken()],
+            useFactory: configCategorySchema,
+          },
         ]),
       ],
       //Me sigo trayendo el DBServices ya que es el que se encarga de limpiar la base de datos
@@ -107,7 +114,7 @@ describe('CategoryService', () => {
       expect(response['X-pagination-total-count']).toEqual(4);
       expect(response['X-pagination-page-count']).toEqual(4);
       expect(response.data.length).toEqual(1);
-      expect(Object.keys(response.data[0]).length).toEqual(7);
+      expect(Object.keys(response.data[0]).length).toEqual(8);
     });
     it('should show a page and a page size of 20, because the parameters if null', async () => {
       await dbTestService.createCategories();
@@ -167,6 +174,8 @@ describe('CategoryService', () => {
 
       expect(response[0]).toEqual(expect.objectContaining(categorieUpdate));
       expect(response[0].updated_at >= now).toBe(true);
+      expect(response[0].slug != categories[0].slug).toBe(true);
+      expect(response[0].slug).toEqual('frutas_acidas');
     });
     it('should reject because the id  not exists', async () => {
       const categorieUpdate = plainToInstance(UpdateCategoryDto, {
