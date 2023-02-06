@@ -59,4 +59,22 @@ export class DBTestService {
     ];
     return this.categoryModel.insertMany(categories);
   }
+
+  // createParameters() {
+  //   const parameters = [
+  //     {
+  //       default: 'Algo por default',
+  //       name: 'name parametro',
+  //       category: 'frutas_invernales',
+  //       description: 'una descripcion de parrametro',
+  //     },
+  //     {
+  //       default: 'Algo por default',
+  //       name: 'nombre de parametro',
+  //       category: 'frutas_invernales',
+  //       description: 'una descripcion de parrametro',
+  //     },
+  //   ];
+  //   return this.parameterModel.insertMany(parameters);
+  // }
 }

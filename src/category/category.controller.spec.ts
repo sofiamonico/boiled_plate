@@ -3,7 +3,7 @@ import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
 import { CategoryService } from './category.service';
 import { CategoryController } from './category.controller';
-import { Category, CategorySchema } from './schema/category.schema';
+import { Category } from './schema/category.schema';
 import { DBTestService } from '../../test/utils/db-test.service';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';

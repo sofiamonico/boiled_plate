@@ -99,7 +99,10 @@ export class CategoryService {
     if (category.length != 0) {
       return category;
     }
-    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    throw new HttpException(
+      'The specified category was not found',
+      HttpStatus.CONFLICT,
+    );
   }
 
   /**

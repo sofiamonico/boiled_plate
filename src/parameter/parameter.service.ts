@@ -29,10 +29,5 @@ export class ParameterService {
       this.categoryService.addParameter(category[0]._id, parameter._id);
       return parameter.save() as any;
     }
-
-    throw new HttpException(
-      'The specified category was not found',
-      HttpStatus.CONFLICT,
-    );
   }
 }

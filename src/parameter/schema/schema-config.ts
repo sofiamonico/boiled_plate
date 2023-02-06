@@ -1,6 +1,6 @@
 import { Parameter } from '../schema/parameter.schema';
 import { ParameterSchema, ParameterDocument } from './parameter.schema';
-import { Connection, Model } from 'mongoose';
+import { Connection } from 'mongoose';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 
@@ -15,8 +15,24 @@ const validateCategory = async (documentToSave: ParameterDocument) => {
   }
 };
 
-function updateSlug(document: ParameterDocument) {
-  document.slug = document.name.toLowerCase().split(' ').join('_');
+async function updateSlug(document: ParameterDocument, conn: Connection) {
+  const newSlug = document.name.toLowerCase().split(' ').join('_');
+  const paremeter = conn.db.collection('parameters');
+  const parameters = await paremeter
+    .find()
+    .filter({ slug: { $regex: newSlug } })
+    .toArray();
+
+  if (parameters.length != 0) {
+    const stringAmount = parameters[parameters.length - 1]['slug'].slice(-1);
+    if (Number(stringAmount)) {
+      document.slug = `${newSlug}${parseInt(stringAmount) + 1}`;
+    } else {
+      document.slug = `${newSlug}1`;
+    }
+  } else {
+    document.slug = newSlug;
+  }
 }
 
 function assingValue(document: ParameterDocument) {
@@ -28,13 +44,14 @@ const preSave = function (conn: Connection) {
   return async function () {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const document: ParameterDocument = this;
+
     await validateCategory(document);
-    updateSlug(document);
     assingValue(document);
+    return updateSlug(document, conn);
   };
 };
 
-export const configParameterSchemaParameter = function (conn: Connection) {
+export const configParameterSchema = function (conn: Connection) {
   const schema = ParameterSchema;
   schema.pre('save', preSave(conn));
   return schema;
