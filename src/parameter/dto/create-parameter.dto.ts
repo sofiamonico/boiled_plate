@@ -11,19 +11,19 @@ export class CreateParameterDto {
   @IsNotEmpty()
   default: string;
 
-  @IsString()
   @MinLength(5)
   @MaxLength(50)
   @IsNotEmpty()
+  @IsString()
   name: string;
 
   @IsString()
   @IsNotEmpty()
   category: string;
 
-  @IsString()
   @MinLength(10)
   @MaxLength(253)
+  @IsString()
   @IsOptional()
   description: string;
 }

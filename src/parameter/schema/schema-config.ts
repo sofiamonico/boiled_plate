@@ -15,6 +15,11 @@ const validateCategory = async (documentToSave: ParameterDocument) => {
   }
 };
 
+/**
+ * method for generate slug increment
+ * @param {ParameterDocument} document
+ * @param {Connection} conn
+ */
 async function updateSlug(document: ParameterDocument, conn: Connection) {
   const newSlug = document.name.toLowerCase().split(' ').join('_');
   const paremeter = conn.db.collection('parameters');

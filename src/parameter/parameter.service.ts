@@ -1,7 +1,7 @@
 import { CreateParameterDto } from './dto/create-parameter.dto';
 import { ParameterDocument } from './schema/parameter.schema';
 import { Parameter } from 'src/parameter/schema/parameter.schema';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CategoryService } from 'src/category/category.service';
@@ -14,7 +14,12 @@ export class ParameterService {
     private readonly categoryService: CategoryService,
   ) {}
 
-  async create(createParameter: CreateParameterDto) {
+  /**
+   *method that create a parameter
+   * @param {CreateParameterDto} createParameter
+   * @returns {Parameter} created category
+   */
+  async create(createParameter: CreateParameterDto): Promise<Parameter> {
     const category = await this.categoryService.findOneBySlug(
       createParameter.category,
     );
