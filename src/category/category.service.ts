@@ -55,6 +55,11 @@ export class CategoryService {
               },
             ],
             categories: [
+              {
+                $match: {
+                  delete_at: null,
+                },
+              },
               { $skip: pagination.skip },
               { $limit: pagination.page_size },
             ],
@@ -70,31 +75,72 @@ export class CategoryService {
    * @param {string} id
    * @returns {Promise<Category>}
    */
-  findOneById(id: string): Promise<any> {
-    return this.categoryModel.find({ _id: id, delete_at: null }) as any;
+  async findOneById(id: string): Promise<any> {
+    const category = (await this.categoryModel.findOne({
+      _id: id,
+      delete_at: null,
+    })) as any;
+    if (category) {
+      return category;
+    }
+    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
   }
 
   /**
    *method to get a category by slug
    * @param {string} slug
-   * @returns {Promise<Category>} || null
+   * @returns {Promise<Category>}
    */
-  findOneBySlug(slug: string): Promise<any> {
-    return this.categoryModel.find({ slug: slug, delete_at: null }) as any;
+  async findOneBySlug(slug: string): Promise<any> {
+    const category = (await this.categoryModel.findOne({
+      slug: slug,
+      delete_at: null,
+    })) as any;
+    if (category) {
+      return category;
+    }
+    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
   }
 
   /**
    * method to update a category
    * @param {string} id
    * @param {UpdateCategoryDto} updateCategoryDto
-   * @returns {Promise<Category>} || null
+   * @throws {HttpException} category not found
+   * @returns {Promise<Category>}
    */
-  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<any> {
-    const category = await this.categoryModel.findById(id);
-    if (category === null) {
-      return null;
+  async update(id: string, updateCategory: UpdateCategoryDto): Promise<any> {
+    const category = await this.categoryModel.findOne({
+      _id: id,
+      delete_at: null,
+    });
+
+    if (category) {
+      Object.assign(category, updateCategory);
+      return category.save() as any;
     }
-    Object.assign(category, updateCategoryDto);
-    return category.save() as any;
+    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+  }
+
+  /**
+   * method to delete a category
+   * @param {string} id
+   * @throws {HttpException} category not found
+   * @returns {Promise<Category>}
+   */
+  async delete(id: string): Promise<any> {
+    const deleted_category = await this.categoryModel.findOneAndUpdate(
+      {
+        _id: id,
+        delete_at: null,
+      },
+      { $set: { delete_at: Date.now() } },
+    );
+
+    if (deleted_category) {
+      return deleted_category as any;
+    }
+
+    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
   }
 }

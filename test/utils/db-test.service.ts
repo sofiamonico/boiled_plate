@@ -26,6 +26,10 @@ export class DBTestService {
     );
   }
 
+  findCategoryWithDelete(id: string) {
+    return this.categoryModel.findById(id);
+  }
+
   createCategories() {
     const categories = [
       {

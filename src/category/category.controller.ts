@@ -2,6 +2,7 @@ import { Pagination } from '../utils/pagination/pagination.dto';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -58,7 +59,7 @@ export class CategoryController {
    */
   @HttpCode(HttpStatus.OK)
   @UsePipes(ParseUUIDPipe)
-  @Get('id=:id')
+  @Get(':id')
   findOneById(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<any> {
@@ -70,7 +71,7 @@ export class CategoryController {
    * @param params
    * @returns {Category}
    */
-  @Get('slug=:slug')
+  @Get('slug/:slug')
   findOneBySlug(@Param() params): Promise<any> {
     return this.categoryService.findOneBySlug(params.slug);
   }
@@ -84,12 +85,21 @@ export class CategoryController {
   @Put(':id')
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Body() updateCategory: UpdateCategoryDto,
   ): Promise<any> {
-    const updateCategory = plainToInstance(
-      UpdateCategoryDto,
-      updateCategoryDto,
-    );
-    return this.categoryService.update(id, updateCategory);
+    const plainCategory = plainToInstance(UpdateCategoryDto, updateCategory);
+    return this.categoryService.update(id, plainCategory);
+  }
+
+  /**
+   *  method to delete a category
+   * @param params
+   * @returns {Promise<Category>}
+   */
+  @Delete(':id')
+  delete(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<any> {
+    return this.categoryService.delete(id);
   }
 }

@@ -10,6 +10,8 @@ import {
 import { DBTestService } from './db-test.service';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
+import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
+import { plainToInstance } from 'class-transformer';
 
 describe('CategoryController', () => {
   let dbTestService: DBTestService;
@@ -170,24 +172,24 @@ describe('CategoryController', () => {
         });
 
       const response = await request(app.getHttpServer())
-        .get(`/categories/id=${newCategory.body._id}`)
+        .get(`/categories/${newCategory.body._id}`)
         .expect(200);
 
-      expect(response.body[0]).toEqual(expect.objectContaining(validCategory));
+      expect(response.body).toEqual(expect.objectContaining(validCategory));
     });
     it('should show a error because the id is not a type UUID4', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/categories/id=${123455}`)
+        .get(`/categories/${123455}`)
         .expect(400);
 
       expect(response.body['errors'][0]).toContain('uuid is expected');
     });
-    it('should show a array empty because the id not exists', async () => {
+    it('should show a error because the id not exists', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/categories/id=${'b730b6a2-1769-461f-8cef-6da06b32c151'}`)
-        .expect(200);
+        .get(`/categories/${'b730b6a2-1769-461f-8cef-6da06b32c151'}`)
+        .expect(404);
 
-      expect(response.body).toEqual([]);
+      expect(response.body['errors'][0]).toEqual('Category not found');
     });
   });
   describe('findOneBySlug', () => {
@@ -204,17 +206,92 @@ describe('CategoryController', () => {
         });
 
       const response = await request(app.getHttpServer())
-        .get(`/categories/slug=${newCategory.body.slug}`)
+        .get(`/categories/slug/${newCategory.body.slug}`)
         .expect(200);
 
-      expect(response.body[0]).toEqual(expect.objectContaining(validCategory));
+      expect(response.body).toEqual(expect.objectContaining(validCategory));
     });
-    it('should show a array empty because the slug not exists', async () => {
+    it('should show a error because the slug not exists', async () => {
       const response = await request(app.getHttpServer())
-        .get(`/categories/slug=frutas`)
+        .get(`/categories/slug/frutas`)
+        .expect(404);
+
+      expect(response.body['errors'][0]).toEqual('Category not found');
+    });
+  });
+  describe('Update', () => {
+    it('should update a category', async () => {
+      const categories = await dbTestService.createCategories();
+      const now = new Date();
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Nueva Categoria',
+        description: 'Categoria de frutas acidas super ricas',
+      });
+      const updateCategory = await request(app.getHttpServer())
+        .put(`/categories/${categories[0]._id}`)
+        .send(categorieUpdate)
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(updateCategory.body.name).toEqual('Nueva Categoria');
+      expect(updateCategory.body.description).toEqual(
+        'Categoria de frutas acidas super ricas',
+      );
+      expect(new Date(updateCategory.body.updated_at) >= now).toBe(true);
+      expect(new Date(updateCategory.body.created_at) <= now).toBe(true);
+      expect(updateCategory.body.delete_at).toEqual(undefined);
+    });
+    it('should show an error because the id  not exists', async () => {
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Nueva Categoria',
+        description: 'Categoria de frutas acidas super ricas',
+      });
+      const updateCategory = await request(app.getHttpServer())
+        .put(`/categories/70f485bc-3bd1-457f-8671-8a09f4da7458`)
+        .send(categorieUpdate)
+        .expect(404);
+      expect(updateCategory.body['errors'][0]).toEqual('Category not found');
+    });
+    it('should be reject because the id is not UUID4', async () => {
+      const categorieUpdate = plainToInstance(UpdateCategoryDto, {
+        name: 'Nueva Categoria',
+        description: 'Categoria de frutas acidas super ricas',
+      });
+      const updateCategory = await request(app.getHttpServer())
+        .put(`/categories/121345`)
+        .send(categorieUpdate)
+        .expect(400);
+      expect(updateCategory.body['errors'][0]).toEqual(
+        'Validation failed (uuid v 4 is expected)',
+      );
+    });
+  });
+  describe('Delete', () => {
+    it('should delete a category', async () => {
+      const now = new Date();
+      const categories = await dbTestService.createCategories();
+
+      await request(app.getHttpServer())
+        .delete(`/categories/${categories[0]._id}`)
+        .expect(200);
+
+      const deleteCategory = await dbTestService.findCategoryWithDelete(
+        categories[0]._id,
+      );
+      expect(new Date(deleteCategory.delete_at) >= now).toBe(true);
+    });
+    it('should a error because the category with this ID not exist', async () => {
+      const deleteCategory = await request(app.getHttpServer())
+        .delete(`/categories/0697b28b-d4c3-4b46-ab2f-626e77e40950`)
+        .expect(404);
+      expect(deleteCategory.body['errors'][0]).toEqual('Category not found');
+    });
+    it('should a error because the ID is not UUID4', async () => {
+      const deleteCategory = await request(app.getHttpServer())
+        .delete(`/categories/12455`)
+        .expect(400);
+      expect(deleteCategory.body['errors'][0]).toEqual(
+        'Validation failed (uuid v 4 is expected)',
+      );
     });
   });
   afterAll(async () => {
