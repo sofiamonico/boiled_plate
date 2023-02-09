@@ -76,11 +76,11 @@ export class CategoryService {
    * @returns {Promise<Category>}
    */
   async findOneById(id: string): Promise<any> {
-    const category = (await this.categoryModel.find({
+    const category = (await this.categoryModel.findOne({
       _id: id,
       delete_at: null,
     })) as any;
-    if (category.length != 0) {
+    if (category) {
       return category;
     }
     throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
@@ -92,11 +92,11 @@ export class CategoryService {
    * @returns {Promise<Category>}
    */
   async findOneBySlug(slug: string): Promise<any> {
-    const category = (await this.categoryModel.find({
+    const category = (await this.categoryModel.findOne({
       slug: slug,
       delete_at: null,
     })) as any;
-    if (category.length != 0) {
+    if (category) {
       return category;
     }
     throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
