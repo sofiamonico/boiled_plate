@@ -30,6 +30,14 @@ export class DBTestService {
     return this.categoryModel.findById(id);
   }
 
+  createCategory() {
+    const category = {
+      name: 'Frutas Invernales',
+      description: 'Una descripcion de una categoria',
+    };
+    return this.categoryModel.create(category);
+  }
+
   createCategories() {
     const categories = [
       {

@@ -7,7 +7,7 @@ import {
   Category,
   CategorySchema,
 } from '../../src/category/schema/category.schema';
-import { DBTestService } from './db-test.service';
+import { DBTestService } from '../../test/utils/db-test.service';
 import { plainToInstance } from 'class-transformer';
 import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
 
@@ -107,7 +107,7 @@ describe('CategoryService', () => {
       expect(response['X-pagination-total-count']).toEqual(4);
       expect(response['X-pagination-page-count']).toEqual(4);
       expect(response.data.length).toEqual(1);
-      expect(Object.keys(response.data[0]).length).toEqual(7);
+      expect(Object.keys(response.data[0]).length).toEqual(8);
     });
     it('should show a page and a page size of 20, because the parameters if null', async () => {
       await dbTestService.createCategories();
