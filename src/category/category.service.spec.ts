@@ -3,10 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
 import { CategoryService } from '../../src/category/category.service';
-import {
-  Category,
-  CategorySchema,
-} from '../../src/category/schema/category.schema';
+import { Category } from '../../src/category/schema/category.schema';
 import { DBTestService } from '../../test/utils/db-test.service';
 import { plainToInstance } from 'class-transformer';
 import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
@@ -135,11 +132,23 @@ describe('CategoryService', () => {
       };
       const category = await categoryService.create(newCategory);
       const response = await categoryService.findOneById(category._id);
-      expect(response[0]).toEqual(expect.objectContaining(newCategory));
+      expect(response).toEqual(expect.objectContaining(newCategory));
     });
-    it('should show a array empty because the id  not exists', async () => {
+    it('should reject because the id not exist', async () => {
       const response = await categoryService
         .findOneById('123456')
+        .catch((e) => e);
+      expect(response.message).toEqual('Category not found');
+    });
+    it('should reject because the category if deleted', async () => {
+      const newCategory = {
+        name: 'Buenas frutas',
+        description: 'Frutas de genialisima calidad',
+      };
+      const category = await categoryService.create(newCategory);
+      await categoryService.delete(category._id);
+      const response = await categoryService
+        .findOneById(category._id)
         .catch((e) => e);
       expect(response.message).toEqual('Category not found');
     });
@@ -152,13 +161,25 @@ describe('CategoryService', () => {
       };
       await categoryService.create(newCategory);
       const response = await categoryService.findOneBySlug('buenas_frutas');
-      expect(response[0]).toEqual(expect.objectContaining(newCategory));
+      expect(response).toEqual(expect.objectContaining(newCategory));
     });
-    it('should show a array empty because the slug not exists', async () => {
+    it('should reject because the id not exist', async () => {
       const response = await categoryService
         .findOneBySlug('frutas')
         .catch((e) => e);
-      expect(response.message).toEqual('Category not found');
+      expect(response.message).toEqual('The specified category was not found');
+    });
+    it('should reject because the category if deleted', async () => {
+      const newCategory = {
+        name: 'Buenas frutas',
+        description: 'Frutas de genialisima calidad',
+      };
+      const category = await categoryService.create(newCategory);
+      await categoryService.delete(category._id);
+      const response = await categoryService
+        .findOneBySlug(category.slug)
+        .catch((e) => e);
+      expect(response.message).toEqual('The specified category was not found');
     });
   });
   describe('Update', () => {
@@ -172,10 +193,9 @@ describe('CategoryService', () => {
       await categoryService.update(categories[0]._id, categorieUpdate);
       const response = await categoryService.findOneById(categories[0]._id);
 
-      expect(response[0]).toEqual(expect.objectContaining(categorieUpdate));
-      expect(response[0].updated_at >= now).toBe(true);
-      expect(response[0].slug != categories[0].slug).toBe(true);
-      expect(response[0].slug).toEqual('frutas_acidas');
+      expect(response).toEqual(expect.objectContaining(categorieUpdate));
+      expect(response.updated_at >= now).toBe(true);
+      expect(response.created_at <= now).toBe(true);
     });
     it('should reject because the id  not exists', async () => {
       const categorieUpdate = plainToInstance(UpdateCategoryDto, {
@@ -196,8 +216,8 @@ describe('CategoryService', () => {
       await categoryService.update(categories[0]._id, categorieUpdate);
       const response = await categoryService.findOneById(categories[0]._id);
 
-      expect(response[0].name).toEqual(categories[0].name);
-      expect(response[0].description).toEqual(
+      expect(response.name).toEqual(categories[0].name);
+      expect(response.description).toEqual(
         'Categoria de frutas acidas super ricas',
       );
     });
@@ -210,8 +230,8 @@ describe('CategoryService', () => {
       await categoryService.update(categories[0]._id, categorieUpdate);
       const response = await categoryService.findOneById(categories[0]._id);
 
-      expect(response[0].description).toEqual(categories[0].description);
-      expect(response[0].name).toEqual('Frutas acidas');
+      expect(response.description).toEqual(categories[0].description);
+      expect(response.name).toEqual('Frutas acidas');
     });
   });
   describe('Delete', () => {

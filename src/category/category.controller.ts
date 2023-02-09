@@ -59,7 +59,7 @@ export class CategoryController {
    */
   @HttpCode(HttpStatus.OK)
   @UsePipes(ParseUUIDPipe)
-  @Get('id=:id')
+  @Get(':id')
   findOneById(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<any> {
@@ -71,7 +71,7 @@ export class CategoryController {
    * @param params
    * @returns {Category}
    */
-  @Get('slug=:slug')
+  @Get('slug/:slug')
   findOneBySlug(@Param() params): Promise<any> {
     return this.categoryService.findOneBySlug(params.slug);
   }

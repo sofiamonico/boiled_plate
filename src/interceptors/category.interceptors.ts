@@ -26,7 +26,7 @@ export class TransformationInterceptor<T>
         const req = context.switchToHttp().getRequest();
 
         if (data['X-pagination-total-count']) {
-          this.armHeader(res, data);
+          this.buildHeader(res, data);
         }
         const newResponse = {
           message: `${req.method} success`,
@@ -38,7 +38,7 @@ export class TransformationInterceptor<T>
     );
   }
 
-  armHeader(res, data) {
+  buildHeader(res, data) {
     res.header('X-pagination-total-count', data['X-pagination-total-count']);
     res.header('X-pagination-page-count', data['X-pagination-page-count']);
     res.header('X-pagination-current-page', data['X-pagination-current-page']);
