@@ -1,17 +1,16 @@
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { getConnectionToken, MongooseModule } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
-import { CategoryService } from '../../src/category/category.service';
-import { CategoryController } from '../../src/category/category.controller';
-import {
-  Category,
-  CategorySchema,
-} from '../../src/category/schema/category.schema';
-import { DBTestService } from './db-test.service';
+import { CategoryService } from './category.service';
+import { CategoryController } from './category.controller';
+import { Category } from './schema/category.schema';
+import { DBTestService } from '../../test/utils/db-test.service';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { UpdateCategoryDto } from '../../src/category/dto/update-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import { plainToInstance } from 'class-transformer';
+import { Connection } from 'mongoose';
+import { configCategorySchema } from './schema/schema-config';
 
 describe('CategoryController', () => {
   let dbTestService: DBTestService;
@@ -25,8 +24,13 @@ describe('CategoryController', () => {
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
         //Cargo el modulo de Category, no hace falta que cargue el archivo de config porque solo estoy testeando el controller
-        MongooseModule.forFeature([
-          { name: Category.name, schema: CategorySchema },
+        MongooseModule.forFeatureAsync([
+          {
+            name: Category.name,
+            imports: [Connection],
+            inject: [getConnectionToken()],
+            useFactory: configCategorySchema,
+          },
         ]),
       ],
       controllers: [CategoryController],
@@ -214,9 +218,11 @@ describe('CategoryController', () => {
     it('should show a error because the slug not exists', async () => {
       const response = await request(app.getHttpServer())
         .get(`/categories/slug/frutas`)
-        .expect(404);
+        .expect(409);
 
-      expect(response.body['errors'][0]).toEqual('Category not found');
+      expect(response.body['errors'][0]).toEqual(
+        'The specified category was not found',
+      );
     });
   });
   describe('Update', () => {

@@ -30,6 +30,14 @@ export class DBTestService {
     return this.categoryModel.findById(id);
   }
 
+  createCategory() {
+    const category = {
+      name: 'Frutas Invernales',
+      description: 'Una descripcion de una categoria',
+    };
+    return this.categoryModel.create(category);
+  }
+
   createCategories() {
     const categories = [
       {
@@ -51,4 +59,22 @@ export class DBTestService {
     ];
     return this.categoryModel.insertMany(categories);
   }
+
+  // createParameters() {
+  //   const parameters = [
+  //     {
+  //       default: 'Algo por default',
+  //       name: 'name parametro',
+  //       category: 'frutas_invernales',
+  //       description: 'una descripcion de parrametro',
+  //     },
+  //     {
+  //       default: 'Algo por default',
+  //       name: 'nombre de parametro',
+  //       category: 'frutas_invernales',
+  //       description: 'una descripcion de parrametro',
+  //     },
+  //   ];
+  //   return this.parameterModel.insertMany(parameters);
+  // }
 }

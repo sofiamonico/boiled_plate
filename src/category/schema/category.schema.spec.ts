@@ -1,4 +1,4 @@
-import { DBTestService } from './db-test.service';
+import { DBTestService } from '../../../test/utils/db-test.service';
 import { ConfigModule } from '@nestjs/config';
 import {
   MongooseModule,
@@ -7,11 +7,8 @@ import {
 } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
 import { Connection, Model } from 'mongoose';
-import {
-  Category,
-  CategoryDocument,
-} from '../../src/category/schema/category.schema';
-import { configCategorySchema } from '../../src/category/schema/schema-config';
+import { Category, CategoryDocument } from './category.schema';
+import { configCategorySchema } from './schema-config';
 
 describe('CategorySchema', () => {
   let dbTestService: DBTestService;
