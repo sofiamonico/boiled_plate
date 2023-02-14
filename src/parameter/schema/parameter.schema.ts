@@ -75,8 +75,6 @@ export class Parameter {
   updated_at: Date;
 
   @Expose()
-  @IsDate()
-  @IsOptional()
   @Prop()
   delete_at: Date;
 }

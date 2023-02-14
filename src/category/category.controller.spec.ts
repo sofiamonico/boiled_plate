@@ -11,6 +11,9 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { plainToInstance } from 'class-transformer';
 import { Connection } from 'mongoose';
 import { configCategorySchema } from './schema/schema-config';
+import { Parameter } from 'src/parameter/schema/parameter.schema';
+import { configParameterSchema } from 'src/parameter/schema/schema-config';
+import { ParameterService } from 'src/parameter/parameter.service';
 
 describe('CategoryController', () => {
   let dbTestService: DBTestService;
@@ -23,6 +26,14 @@ describe('CategoryController', () => {
         MongooseModule.forRoot(
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
+        MongooseModule.forFeatureAsync([
+          {
+            name: Parameter.name,
+            imports: [Connection],
+            inject: [getConnectionToken()],
+            useFactory: configParameterSchema,
+          },
+        ]),
         //Cargo el modulo de Category, no hace falta que cargue el archivo de config porque solo estoy testeando el controller
         MongooseModule.forFeatureAsync([
           {
@@ -34,7 +45,7 @@ describe('CategoryController', () => {
         ]),
       ],
       controllers: [CategoryController],
-      providers: [DBTestService, CategoryService],
+      providers: [DBTestService, ParameterService, CategoryService],
     }).compile();
 
     categoryController = moduleRef.get<CategoryController>(CategoryController);

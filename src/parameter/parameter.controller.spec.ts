@@ -25,7 +25,6 @@ describe('ParameterController', () => {
         MongooseModule.forRoot(
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
-        //Cargo el modulo de Category, no hace falta que cargue el archivo de config porque solo estoy testeando el controller
         MongooseModule.forFeatureAsync([
           {
             name: Parameter.name,
@@ -89,6 +88,21 @@ describe('ParameterController', () => {
       expect(response.body.value).toEqual(validParameter.default);
       expect(new Date(response.body.created_at) >= now).toBe(true);
       expect(new Date(response.body.updated_at) >= now).toBe(true);
+    });
+  });
+  describe('findAll', () => {
+    it('should show paginated data', async () => {
+      await dbTestService.createParameters();
+
+      const response = await request(app.getHttpServer())
+        .get('/parameters?page=1&page_size=1')
+        .expect(200);
+
+      expect(response.body['X-pagination-current-page']).toEqual(1);
+      expect(response.body['X-pagination-page-count']).toEqual(2);
+      expect(response.body['X-pagination-page-size']).toEqual(1);
+      expect(response.body['X-pagination-total-count']).toEqual(2);
+      expect(response.body.data.length).toEqual(1);
     });
   });
   describe('Validations', () => {

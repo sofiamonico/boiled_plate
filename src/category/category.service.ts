@@ -46,7 +46,7 @@ export class CategoryService {
       .aggregate([
         {
           $facet: {
-            totalCategories: [
+            totalCount: [
               {
                 $group: {
                   _id: null,
@@ -54,7 +54,7 @@ export class CategoryService {
                 },
               },
             ],
-            categories: [
+            data: [
               {
                 $match: {
                   delete_at: null,

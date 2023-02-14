@@ -9,10 +9,14 @@ import { Parameter } from '../../src/parameter/schema/parameter.schema';
 import { configCategorySchema } from 'src/category/schema/schema-config';
 import { Connection } from 'mongoose';
 import { configParameterSchema } from './schema/schema-config';
+import { plainToInstance } from 'class-transformer';
+import { Pagination } from 'src/utils/pagination/pagination.dto';
+import { Filter } from './dto/filter.dto';
 
 describe('ParameterService', () => {
   let dbTestService: DBTestService;
   let parameterService: ParameterService;
+  let categoryService: CategoryService;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -43,6 +47,7 @@ describe('ParameterService', () => {
 
     dbTestService = moduleRef.get<DBTestService>(DBTestService);
     parameterService = moduleRef.get<ParameterService>(ParameterService);
+    categoryService = moduleRef.get<CategoryService>(CategoryService);
   });
 
   beforeEach(async () => {
@@ -56,6 +61,7 @@ describe('ParameterService', () => {
   describe('CreateParameter', () => {
     it('should create a correct parameter', async () => {
       const category = await dbTestService.createCategory();
+
       const validParameter = {
         default: 'Algo por default',
         name: 'nombre parametro',
@@ -108,6 +114,84 @@ describe('ParameterService', () => {
       expect(response.message).toContain(
         'The specified category was not found',
       );
+    });
+  });
+  describe('findAll', () => {
+    it('should show paginated data', async () => {
+      await dbTestService.createParameters();
+      const pagination = plainToInstance(Pagination, {
+        page: 1,
+        page_size: 2,
+      });
+      const filters = plainToInstance(Filter, {});
+
+      const response = await parameterService.findAll(pagination, filters);
+      expect(response['X-pagination-current-page']).toEqual(1);
+      expect(response['X-pagination-page-size']).toEqual(2);
+      expect(response['X-pagination-total-count']).toEqual(2);
+      expect(response['X-pagination-page-count']).toEqual(1);
+      expect(response.data[0]['delete_at']).toEqual(undefined);
+      expect(response.data.length).toEqual(2);
+      expect(Object.keys(response.data[0]).length).toEqual(10);
+    });
+
+    it('should show paginated data, fileted by name', async () => {
+      await dbTestService.createParameters();
+      const pagination = plainToInstance(Pagination, {
+        page: 1,
+        page_size: 1,
+      });
+      const filters = plainToInstance(Filter, {
+        name: 'nombre de parametro',
+      });
+      const response = await parameterService.findAll(pagination, filters);
+
+      expect(response.data[0]['name']).toEqual('nombre de parametro');
+      expect(response.data[0]['delete_at']).toEqual(undefined);
+      expect(response.data.length).toEqual(1);
+    });
+
+    it('should show paginated data, fileted by category', async () => {
+      await dbTestService.createParameters();
+      const pagination = plainToInstance(Pagination, {
+        page: 1,
+        page_size: 2,
+      });
+      const filters = plainToInstance(Filter, {
+        category: 'frutas_invernales',
+      });
+      const response = await parameterService.findAll(pagination, filters);
+
+      const category = await categoryService.findOneById(
+        response.data[0]['category'] as any,
+      );
+      expect(category.slug).toEqual('frutas_invernales');
+      expect(response.data[0]['delete_at']).toEqual(undefined);
+      expect(response.data.length).toEqual(2);
+    });
+
+    it('should show paginated data, fileted by name and category', async () => {
+      await dbTestService.createParameters();
+      const pagination = plainToInstance(Pagination, {
+        page: 1,
+        page_size: 2,
+      });
+
+      const filters = plainToInstance(Filter, {
+        name: 'nombre de parametro',
+        category: 'frutas_invernales',
+      });
+
+      const response = await parameterService.findAll(pagination, filters);
+
+      const category = await categoryService.findOneById(
+        response.data[0]['category'] as any,
+      );
+
+      expect(response.data[0]['name']).toEqual('nombre de parametro');
+      expect(category.slug).toEqual('frutas_invernales');
+      expect(response.data[0]['delete_at']).toEqual(undefined);
+      expect(response.data.length).toEqual(1);
     });
   });
 });
