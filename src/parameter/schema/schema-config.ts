@@ -39,7 +39,10 @@ async function updateSlug(document: ParameterDocument, conn: Connection) {
     document.slug = newSlug;
   }
 }
-
+/**
+ * method for assing value with default
+ * @param {ParameterDocument} document
+ */
 function assingValue(document: ParameterDocument) {
   document.value = document.default;
 }

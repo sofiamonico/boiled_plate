@@ -20,7 +20,7 @@ export class ParameterService {
   /**
    *method that create a parameter
    * @param {CreateParameterDto} createParameter
-   * @returns {Parameter} created category
+   * @returns {Parameter} created parameter
    */
   async create(createParameter: CreateParameterDto): Promise<Parameter> {
     const category = await this.categoryService.findOneBySlug(
@@ -39,6 +39,12 @@ export class ParameterService {
     }
   }
 
+  /**
+   * method that brings all parameters with pagination and filters
+   * @param {Pagination} pagination
+   * @param {Filter} filterParams
+   * @returns {Promise<PaginatedResponse<Parameter>>}
+   */
   async findAll(
     pagination: Pagination,
     filterParams: Filter,
@@ -75,18 +81,25 @@ export class ParameterService {
     return pagination.buildPaginatedResponse(data);
   }
 
-  async buildCategoryFilter(filters) {
+  /**
+   * method that building a new filters
+   * @param {Filter} filters
+   * @returns {Filter} filters
+   */
+  private async buildCategoryFilter(filters: Filter): Promise<any> {
+    const newFilter = {};
     if (filters['category'] || filters['name']) {
       if (filters['category']) {
         const category = await this.categoryService.findOneBySlug(
           filters['category'],
         );
-        filters['category'] = category._id;
+        newFilter['category'] = category._id;
       }
-    } else {
-      filters = {};
+      if (filters['name']) {
+        newFilter['name'] = filters['name'];
+      }
     }
 
-    return filters;
+    return newFilter;
   }
 }

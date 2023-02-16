@@ -15,6 +15,7 @@ import * as request from 'supertest';
 
 describe('ParameterController', () => {
   let dbTestService: DBTestService;
+  let categoryService: CategoryService;
   let parameterController: ParameterController;
   let app: INestApplication;
 
@@ -49,8 +50,13 @@ describe('ParameterController', () => {
     parameterController =
       moduleRef.get<ParameterController>(ParameterController);
     dbTestService = moduleRef.get<DBTestService>(DBTestService);
+    categoryService = moduleRef.get<CategoryService>(CategoryService);
     app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+      }),
+    );
     await app.init();
   });
 
@@ -104,8 +110,52 @@ describe('ParameterController', () => {
       expect(response.body['X-pagination-total-count']).toEqual(2);
       expect(response.body.data.length).toEqual(1);
     });
+    it('should show paginated data with name filter', async () => {
+      await dbTestService.createParameters();
+
+      const response = await request(app.getHttpServer())
+        .get('/parameters?page=1&page_size=1&name=name parametro')
+        .expect(200);
+
+      expect(response.body['X-pagination-current-page']).toEqual(1);
+      expect(response.body['X-pagination-page-count']).toEqual(2);
+      expect(response.body['X-pagination-page-size']).toEqual(1);
+      expect(response.body['X-pagination-total-count']).toEqual(2);
+      expect(response.body.data[0]['name']).toEqual('name parametro');
+    });
+    it('should show paginated data with category filter', async () => {
+      await dbTestService.createParameters();
+
+      const response = await request(app.getHttpServer())
+        .get('/parameters?page=1&page_size=1&category=frutas_invernales')
+        .expect(200);
+      const category = await categoryService.findOneById(
+        response.body.data[0]['category'],
+      );
+      expect(response.body['X-pagination-current-page']).toEqual(1);
+      expect(response.body['X-pagination-page-count']).toEqual(2);
+      expect(response.body['X-pagination-page-size']).toEqual(1);
+      expect(response.body['X-pagination-total-count']).toEqual(2);
+      expect(category.slug).toEqual('frutas_invernales');
+    });
+    it('should show data with category and name filter', async () => {
+      await dbTestService.createParameters();
+
+      const response = await request(app.getHttpServer())
+        .get('/parameters?name=name parametro&category=frutas_invernales')
+        .expect(200);
+      const category = await categoryService.findOneById(
+        response.body.data[0]['category'],
+      );
+      expect(response.body['X-pagination-current-page']).toEqual(1);
+      expect(response.body['X-pagination-page-count']).toEqual(1);
+      expect(response.body['X-pagination-page-size']).toEqual(20);
+      expect(response.body['X-pagination-total-count']).toEqual(2);
+      expect(response.body.data[0]['name']).toEqual('name parametro');
+      expect(category.slug).toEqual('frutas_invernales');
+    });
   });
-  describe('Validations', () => {
+  describe('Validations create a parameter', () => {
     it.each([
       {
         variables: {
@@ -198,6 +248,38 @@ describe('ParameterController', () => {
           category: variables.category ? variables.category : category.slug,
           description: variables.description,
         })
+        .expect(400);
+
+      expect(response.body['errors'][0][0]).toEqual(error);
+    });
+  });
+  describe('Validation findAll Parameters with pagination and filters', () => {
+    it.each([
+      {
+        variables: {
+          page: 'hola',
+          page_size: 2,
+          name: 'name parametro',
+          category: 'frutas_invernales',
+        },
+        error: 'page must be a number conforming to the specified constraints',
+      },
+      {
+        variables: {
+          page: 1,
+          page_size: 'holaa',
+          name: 'name parametro',
+          category: 'frutas_invernales',
+        },
+        error:
+          'page_size must be a number conforming to the specified constraints',
+      },
+    ])('returns error: $error', async ({ variables, error }) => {
+      await dbTestService.createParameters();
+      const response = await request(app.getHttpServer())
+        .get(
+          `/parameters?page=${variables['page']}&page_size=${variables['page_size']}&name=${variables['name']}&category=${variables['category']}`,
+        )
         .expect(400);
 
       expect(response.body['errors'][0][0]).toEqual(error);

@@ -15,11 +15,22 @@ import { plainToInstance } from 'class-transformer';
 export class ParameterController {
   constructor(private readonly parameterService: ParameterService) {}
 
+  /**
+   * Controller POST /categories to create parameters
+   * @param {CreateParameterDto} createParameter
+   * @returns {Parameter}
+   */
   @Post()
   create(@Body() createParameter: CreateParameterDto): Promise<Parameter> {
     return this.parameterService.create(createParameter);
   }
 
+  /**
+   *  controller to get all paginated parameters and filters
+   * @param {Pagination} plainPagination
+   * @param {Filter} filter
+   * @returns {Promise<PaginatedResponse<Parameter>>}
+   */
   @Get()
   findAll(
     @Query() plainPagination: Pagination,

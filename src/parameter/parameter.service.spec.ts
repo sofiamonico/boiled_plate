@@ -193,5 +193,22 @@ describe('ParameterService', () => {
       expect(response.data[0]['delete_at']).toEqual(undefined);
       expect(response.data.length).toEqual(1);
     });
+    it('should first display the last parameter created', async () => {
+      await dbTestService.createParameters();
+      const pagination = plainToInstance(Pagination, {});
+
+      const filters = plainToInstance(Filter, {});
+
+      const response = await parameterService.findAll(pagination, filters);
+
+      expect(response.data[0]['name']).toEqual('nombre de parametro');
+      expect(response.data[0]['default']).toEqual('Algo por default');
+      expect(response.data[0]['description']).toEqual(
+        'una descripcion de parrametro',
+      );
+      expect(
+        response.data[0]['created_at'] > response.data[1]['created_at'],
+      ).toBe(true);
+    });
   });
 });
