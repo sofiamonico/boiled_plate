@@ -24,9 +24,7 @@ export class Pagination {
     //capture the number of existing categories. If not exist none category,
     // amountCategories is equal to 0
     const amountCategories =
-      data[0].totalCategories.length === 0
-        ? 0
-        : data[0].totalCategories[0].count;
+      data[0].totalCount.length === 0 ? 0 : data[0].totalCount[0].count;
     //function that calculates the total number of pages
     const amountPages = this.getTotalPages(amountCategories);
 
@@ -35,7 +33,7 @@ export class Pagination {
       'X-pagination-page-count': amountPages,
       'X-pagination-current-page': this.page,
       'X-pagination-page-size': this.page_size,
-      data: data[0].categories,
+      data: data[0].data,
     };
   }
 }

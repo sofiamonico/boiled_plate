@@ -1,4 +1,4 @@
-import { DBTestService } from './db-test.service';
+import { DBTestService } from '../../../test/utils/db-test.service';
 import { ConfigModule } from '@nestjs/config';
 import {
   MongooseModule,
@@ -7,11 +7,12 @@ import {
 } from '@nestjs/mongoose';
 import { Test } from '@nestjs/testing';
 import { Connection, Model } from 'mongoose';
-import {
-  Category,
-  CategoryDocument,
-} from '../../src/category/schema/category.schema';
-import { configCategorySchema } from '../../src/category/schema/schema-config';
+import { Category, CategoryDocument } from './category.schema';
+import { configCategorySchema } from './schema-config';
+import { Parameter } from 'src/parameter/schema/parameter.schema';
+import { configParameterSchema } from 'src/parameter/schema/schema-config';
+import { ParameterService } from 'src/parameter/parameter.service';
+import { CategoryService } from '../category.service';
 
 describe('CategorySchema', () => {
   let dbTestService: DBTestService;
@@ -24,7 +25,14 @@ describe('CategorySchema', () => {
         MongooseModule.forRoot(
           `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@mongo:27017/test?authSource=admin`,
         ),
-        //Configuro el modulo para que pase por las validaciones de class-validator del esquema
+        MongooseModule.forFeatureAsync([
+          {
+            name: Parameter.name,
+            imports: [Connection],
+            inject: [getConnectionToken()],
+            useFactory: configParameterSchema,
+          },
+        ]),
         MongooseModule.forFeatureAsync([
           {
             name: Category.name,
@@ -35,7 +43,7 @@ describe('CategorySchema', () => {
         ]),
       ],
       //Service que se encarga de limpiar la DB
-      providers: [DBTestService],
+      providers: [DBTestService, ParameterService, CategoryService],
     }).compile();
 
     categoryModel = moduleRef.get<Model<CategoryDocument>>(

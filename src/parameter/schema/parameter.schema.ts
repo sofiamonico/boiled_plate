@@ -1,11 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Expose } from 'class-transformer';
-import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
+import {
+  IsDate,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Parameter } from 'src/parameter/schema/parameter.schema';
+import { Category } from '../../category/schema/category.schema';
 import { v4 as uuidv4 } from 'uuid';
 
-export type CategoryDocument = HydratedDocument<Category>;
+export type ParameterDocument = HydratedDocument<Parameter>;
 
 @Exclude()
 @Schema({
@@ -14,7 +21,7 @@ export type CategoryDocument = HydratedDocument<Category>;
     updatedAt: 'updated_at', // and `updated_at` to store the last updated date
   },
 })
-export class Category {
+export class Parameter {
   @Prop({
     type: String,
     //This function generates a unique ID based on uuidv4
@@ -27,32 +34,37 @@ export class Category {
   @Expose()
   @IsString()
   @IsNotEmpty()
-  @MinLength(3)
-  @MaxLength(50)
-  @Prop({ required: true, unique: true })
-  name: string;
+  @Prop()
+  default: string;
 
   @Expose()
-  @Prop({
-    //This function is responsible for taking the name of the category,
-    //converting it to lower case and adding an underscore for each word.
-    default: function () {
-      return this.name.toLowerCase().split(' ').join('_');
-    },
-    unique: true,
-  })
-  slug: string;
+  @Prop()
+  value: string;
 
   @Expose()
   @IsString()
   @IsNotEmpty()
-  @MinLength(20)
-  @MaxLength(70)
-  @Prop({ required: true })
+  @MinLength(5)
+  @MaxLength(50)
+  @Prop()
+  name: string;
+
+  @Expose()
+  @Prop({
+    index: { unique: true },
+  })
+  slug: string;
+
+  @Expose()
+  @IsOptional()
+  @IsString()
+  @MinLength(10)
+  @MaxLength(253)
+  @Prop()
   description: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.String, ref: 'Parameter' }] })
-  parameters: Parameter[];
+  @Prop({ type: mongoose.Schema.Types.String, ref: 'Category' })
+  category: Category;
 
   @Expose()
   @Prop()
@@ -67,4 +79,4 @@ export class Category {
   delete_at: Date;
 }
 
-export const CategorySchema = SchemaFactory.createForClass(Category);
+export const ParameterSchema = SchemaFactory.createForClass(Parameter);
