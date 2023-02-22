@@ -50,9 +50,7 @@ export class Parameter {
   name: string;
 
   @Expose()
-  @Prop({
-    index: { unique: true },
-  })
+  @Prop()
   slug: string;
 
   @Expose()
@@ -80,3 +78,5 @@ export class Parameter {
 }
 
 export const ParameterSchema = SchemaFactory.createForClass(Parameter);
+
+ParameterSchema.index({ slug: 1, delete_at: 1 }, { unique: true });

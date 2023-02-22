@@ -2,12 +2,13 @@ import { Filter } from './dto/filter.dto';
 import { CreateParameterDto } from './dto/create-parameter.dto';
 import { ParameterDocument } from './schema/parameter.schema';
 import { Parameter } from 'src/parameter/schema/parameter.schema';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { CategoryService } from 'src/category/category.service';
 import { Pagination } from 'src/utils/pagination/pagination.dto';
 import { PaginatedResponse } from 'src/types/pagination.types';
+import { SlugDto } from './dto/slug.dto';
 
 @Injectable()
 export class ParameterService {
@@ -79,6 +80,21 @@ export class ParameterService {
       .exec();
 
     return pagination.buildPaginatedResponse(data);
+  }
+
+  async findOneBySlug(slugFilter: SlugDto): Promise<any> {
+    const parameter = (await this.parameterModel.findOne({
+      slug: slugFilter.slug,
+      delete_at: null,
+    })) as any;
+    if (parameter) {
+      return parameter;
+    }
+
+    throw new HttpException(
+      'The specified parameter was not found',
+      HttpStatus.CONFLICT,
+    );
   }
 
   /**

@@ -174,7 +174,7 @@ describe('CategoryService', () => {
       const response = await categoryService.findOneBySlug('buenas_frutas');
       expect(response).toEqual(expect.objectContaining(newCategory));
     });
-    it('should reject because the id not exist', async () => {
+    it('should reject because the slug not exist', async () => {
       const response = await categoryService
         .findOneBySlug('frutas')
         .catch((e) => e);

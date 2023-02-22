@@ -11,6 +11,8 @@ import { DBTestService } from '../../../test/utils/db-test.service';
 import { Parameter, ParameterDocument } from './parameter.schema';
 import { Category } from '../../category/schema/category.schema';
 import { configCategorySchema } from '../../category/schema/schema-config';
+import { ParameterService } from '../parameter.service';
+import { CategoryService } from 'src/category/category.service';
 
 describe('ParameterSchema', () => {
   let dbTestService: DBTestService;
@@ -40,7 +42,7 @@ describe('ParameterSchema', () => {
           },
         ]),
       ],
-      providers: [DBTestService],
+      providers: [DBTestService, ParameterService, CategoryService],
     }).compile();
 
     parameterModel = moduleRef.get<Model<ParameterDocument>>(

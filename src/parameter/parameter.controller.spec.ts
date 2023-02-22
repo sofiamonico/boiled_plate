@@ -12,6 +12,9 @@ import { Category } from 'src/category/schema/category.schema';
 import { configCategorySchema } from 'src/category/schema/schema-config';
 import { CategoryService } from 'src/category/category.service';
 import * as request from 'supertest';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import { SlugDto } from './dto/slug.dto';
 
 describe('ParameterController', () => {
   let dbTestService: DBTestService;
@@ -153,6 +156,64 @@ describe('ParameterController', () => {
       expect(response.body['X-pagination-total-count']).toEqual(2);
       expect(response.body.data[0]['name']).toEqual('name parametro');
       expect(category.slug).toEqual('frutas_invernales');
+    });
+  });
+  describe('findOneBySlug', () => {
+    it('should a category by slug', async () => {
+      await dbTestService.createParameters();
+
+      const response = await request(app.getHttpServer())
+        .get('/parameters/slug/name_parametro')
+        .expect(200);
+
+      expect(response.body.slug).toEqual('name_parametro');
+    });
+    it('should reject because the slug not exist', async () => {
+      await dbTestService.createParameters();
+
+      const response = await request(app.getHttpServer())
+        .get('/parameters/slug/nombre_falso')
+        .expect(409);
+
+      expect(response.body['errors'][0]).toEqual(
+        'The specified parameter was not found',
+      );
+    });
+    it('should reject because the slug is not a string', async () => {
+      await dbTestService.createParameters();
+      const slug = plainToInstance(SlugDto, { slug: [1, 2, 3, 4] });
+      const err = await validate(slug);
+
+      expect(err.toString()).toContain(
+        `property slug has failed the following constraints: isString`,
+      );
+    });
+    it('should reject because the slug exceeds its maximum length', async () => {
+      await dbTestService.createParameters();
+      const slug = plainToInstance(SlugDto, { slug: 's'.repeat(51) });
+      const err = await validate(slug);
+
+      expect(err.toString()).toContain(
+        `property slug has failed the following constraints: maxLength`,
+      );
+    });
+    it('should reject because the slug does not exceed its minimum length', async () => {
+      await dbTestService.createParameters();
+      const slug = plainToInstance(SlugDto, { slug: 's' });
+      const err = await validate(slug);
+
+      expect(err.toString()).toContain(
+        `property slug has failed the following constraints: minLength`,
+      );
+    });
+    it('should reject because the slug is empty', async () => {
+      await dbTestService.createParameters();
+      const slug = plainToInstance(SlugDto, { slug: '' });
+      const err = await validate(slug);
+
+      expect(err.toString()).toContain(
+        `property slug has failed the following constraints: isNotEmpty`,
+      );
     });
   });
   describe('Validations create a parameter', () => {

@@ -12,6 +12,7 @@ import { configParameterSchema } from './schema/schema-config';
 import { plainToInstance } from 'class-transformer';
 import { Pagination } from 'src/utils/pagination/pagination.dto';
 import { Filter } from './dto/filter.dto';
+import { SlugDto } from './dto/slug.dto';
 
 describe('ParameterService', () => {
   let dbTestService: DBTestService;
@@ -209,6 +210,25 @@ describe('ParameterService', () => {
       expect(
         response.data[0]['created_at'] > response.data[1]['created_at'],
       ).toBe(true);
+    });
+  });
+  describe('findOnebySlug', () => {
+    it('should a category by slug', async () => {
+      await dbTestService.createParameters();
+
+      const slug = plainToInstance(SlugDto, { slug: 'name_parametro' });
+      const parameter = await parameterService.findOneBySlug(slug);
+
+      expect(parameter.slug).toEqual('name_parametro');
+      expect(parameter.delete_at).toEqual(undefined);
+    });
+    it('should reject because the slug not exist', async () => {
+      await dbTestService.createParameters();
+      const slug = plainToInstance(SlugDto, { slug: 'nombre_falso' });
+      const response = await parameterService
+        .findOneBySlug(slug)
+        .catch((e) => e);
+      expect(response.message).toEqual('The specified parameter was not found');
     });
   });
 });
