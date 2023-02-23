@@ -46,7 +46,7 @@ export class CategoryService {
       .aggregate([
         {
           $facet: {
-            totalCategories: [
+            totalCount: [
               {
                 $group: {
                   _id: null,
@@ -54,7 +54,7 @@ export class CategoryService {
                 },
               },
             ],
-            categories: [
+            data: [
               {
                 $match: {
                   delete_at: null,
@@ -99,7 +99,10 @@ export class CategoryService {
     if (category) {
       return category;
     }
-    throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    throw new HttpException(
+      'The specified category was not found',
+      HttpStatus.CONFLICT,
+    );
   }
 
   /**
@@ -142,5 +145,11 @@ export class CategoryService {
     }
 
     throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+  }
+
+  async addParameter(id: string, id_parameter: string) {
+    await this.categoryModel.findByIdAndUpdate(id, {
+      $push: { parameters: id_parameter },
+    });
   }
 }
